@@ -1444,19 +1444,22 @@
         if (modalIsOpen) closeModal();
     });
 
-
-
 (function() {
     function injectProductSchema() {
         const urlParams = new URLSearchParams(window.location.search);
-        if (!urlParams.get('product')) return;
+        const productId = urlParams.get('product');
+
+        // אם אין מזהה מוצר ב-URL, אל תפעיל סכמת מוצר בכלל (זה דף הבית)
+        if (!productId) return;
 
         const nameElem = document.getElementById('modal-title');
         const priceElem = document.getElementById('modal-price');
         const imgElem = document.getElementById('modal-main-image');
 
-        // בדיקה האם הנתונים כבר קיימים והם לא ברירת מחדל ריקה
-        if (nameElem && nameElem.innerText.trim() !== "" && priceElem && priceElem.innerText.includes('₪')) {
+        // בדיקה קריטית: האם הנתונים בתוך המודל כבר התעדכנו מה-Sheets?
+        // אנחנו מוודאים שהשם לא ריק ושהמחיר מכיל את סימן השקל (סימן שהנתון הגיע)
+        if (nameElem && nameElem.innerText.trim().length > 2 && priceElem && priceElem.innerText.includes('₪')) {
+            
             const price = priceElem.innerText.replace(/[^0-9.]/g, '');
             
             const schema = {
@@ -1465,7 +1468,7 @@
                 "name": nameElem.innerText,
                 "image": [imgElem ? imgElem.src : ""],
                 "description": nameElem.innerText,
-                "sku": urlParams.get('product'),
+                "sku": productId,
                 "offers": {
                     "@type": "Offer",
                     "url": window.location.href,
@@ -1485,24 +1488,22 @@
             script.text = JSON.stringify(schema);
             document.head.appendChild(script);
             
-            // ברגע שהזרקנו בהצלחה, אפשר להפסיק לעקוב
+            // ברגע שהצלחנו להזריק נתוני מוצר אמיתיים, נפסיק את המעקב
             observer.disconnect();
         }
     }
 
-    // הגדרת "צופה" שיזהה מתי ה-HTML משתנה (כשהנתונים מגיעים מה-Sheets)
     const observer = new MutationObserver((mutations) => {
         injectProductSchema();
     });
 
-    // התחלת מעקב על גוף הדף
+    // המעקב מתבצע על כל שינוי בטקסט או באלמנטים בדף
     observer.observe(document.body, {
         childList: true,
         subtree: true,
         characterData: true
     });
 
-    // הפעלה ראשונית ליתר ביטחון
     window.addEventListener('load', injectProductSchema);
 })();
 </script>
