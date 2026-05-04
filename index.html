@@ -563,7 +563,7 @@
 <script>
     AOS.init({ duration: 1000, once: true });
 
-    const TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTtyoe510f5vB5u1jW6b_VdZaCl2N_5IMO3i07jQB6P7YOtadif2C2otzqmWS5o34E-pIXDHVfX0fdf/pub?output=tsv';
+    const PRODUCTS_JSON_URL = './products.json';
     const TESTIMONIALS_TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTtyoe510f5vB5u1jW6b_VdZaCl2N_5IMO3i07jQB6P7YOtadif2C2otzqmWS5o34E-pIXDHVfX0fdf/pub?gid=1394850774&single=true&output=tsv';
 
     const productCatalog = [];
@@ -580,35 +580,23 @@
 
     async function loadCatalog() {
         try {
-            const response = await fetch(TSV_URL);
-            const data = await response.text();
-            const rows = data.split('\n').slice(1);
+            const response = await fetch(PRODUCTS_JSON_URL, { cache: 'no-store' });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const items = await response.json();
             const grid = document.getElementById('product-grid');
             grid.innerHTML = '';
 
-            rows.forEach((row) => {
-                const columns = row.split('\t');
-                if (columns.length < 4) return;
-
-                const [nameRaw, priceRaw, descriptionRaw, imageUrlsRaw] = columns;
-                const name = (nameRaw || '').trim();
-                const description = (descriptionRaw || '')
-    .trim()
-    .replace(/\s\s+/g, '\n');
-                const numericPrice = Number((priceRaw || '').replace(/[^\d.]/g, '')) || 0;
-                const images = (imageUrlsRaw || '')
-                    .split(',')
-                    .map((url) => url.trim())
-                    .filter(Boolean);
-
+            const normalizedItems = Array.isArray(items) ? items : [];
+            normalizedItems.forEach((item, index) => {
+                const name = (item?.name || '').toString().trim();
                 if (!name) return;
 
                 const product = {
-                    id: `p-${productCatalog.length}`,
+                    id: (item?.id || `p-${index}`).toString(),
                     name,
-                    description,
-                    price: numericPrice,
-                    images: images.length ? images : ['https://placehold.co/600x400?text=WanderWood']
+                    description: (item?.description || '').toString().trim().replace(/\s\s+/g, '\n'),
+                    price: Number(item?.price) || 0,
+                    images: Array.isArray(item?.images) && item.images.length ? item.images : ['https://placehold.co/600x400?text=WanderWood']
                 };
 
                 productCatalog.push(product);
