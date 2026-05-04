@@ -1443,6 +1443,51 @@
         }
         if (modalIsOpen) closeModal();
     });
+
+    (function() {
+    function injectDynamicProductSchema() {
+        // חילוץ מזהה המוצר משורת הכתובת (למשל p-1)
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('product');
+
+        // אם אנחנו לא בעמוד מוצר, אל תעשה כלום
+        if (!productId) return;
+
+        // איסוף נתונים מהאלמנטים בדף
+        // וודא שה-Selectors (.product-title, .product-price וכו') תואמים למבנה שלך
+        const name = document.querySelector('.product-title')?.innerText || "מוצר " + productId;
+        const price = document.querySelector('.product-price')?.innerText.replace(/[^0-9.]/g, '') || "0.00";
+        const description = document.querySelector('.product-description')?.innerText || "תיאור עבור " + name;
+        const image = document.querySelector('.main-product-image')?.src || "";
+
+        const productSchema = {
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": name,
+            "image": image ? [image] : [],
+            "description": description,
+            "sku": productId,
+            "offers": {
+                "@type": "Offer",
+                "url": window.location.href,
+                "priceCurrency": "ILS",
+                "price": price,
+                "itemCondition": "https://schema.org/NewCondition",
+                "availability": "https://schema.org/InStock"
+            }
+        };
+
+        // יצירת תגית הסקריפט והזרקתה ל-head
+        const script = document.createElement('script');
+        script.type = 'application/ld+json';
+        script.text = JSON.stringify(productSchema);
+        document.head.appendChild(script);
+    }
+
+    // הפעלה לאחר שהדף נטען במלואו
+    window.addEventListener('load', injectDynamicProductSchema);
+})();
+    
 </script>
 </body>
 </html>
