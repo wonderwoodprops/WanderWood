@@ -1445,61 +1445,66 @@
     });
 
 
+
 (function() {
-    function injectDynamicProductSchema() {
-        // חילוץ מזהה המוצר משורת הכתובת
+    function injectProductSchema() {
         const urlParams = new URLSearchParams(window.location.search);
-        const productId = urlParams.get('product');
+        if (!urlParams.get('product')) return;
 
-        if (!productId) return;
+        const nameElem = document.getElementById('modal-title');
+        const priceElem = document.getElementById('modal-price');
+        const imgElem = document.getElementById('modal-main-image');
 
-        // שליפת הנתונים לפי ה-ID הספציפיים שציינת
-        const nameElement = document.getElementById('modal-title');
-        const priceElement = document.getElementById('modal-price');
-        const imageElement = document.getElementById('modal-main-image');
+        // בדיקה האם הנתונים כבר קיימים והם לא ברירת מחדל ריקה
+        if (nameElem && nameElem.innerText.trim() !== "" && priceElem && priceElem.innerText.includes('₪')) {
+            const price = priceElem.innerText.replace(/[^0-9.]/g, '');
+            
+            const schema = {
+                "@context": "https://schema.org/",
+                "@type": "Product",
+                "name": nameElem.innerText,
+                "image": [imgElem ? imgElem.src : ""],
+                "description": nameElem.innerText,
+                "sku": urlParams.get('product'),
+                "offers": {
+                    "@type": "Offer",
+                    "url": window.location.href,
+                    "priceCurrency": "ILS",
+                    "price": price,
+                    "itemCondition": "https://schema.org/NewCondition",
+                    "availability": "https://schema.org/InStock"
+                }
+            };
 
-        // עיבוד הנתונים
-        const name = nameElement ? nameElement.innerText : "מוצר " + productId;
-        // ניקוי המחיר מסימן השקלים והשארת מספר בלבד
-        const price = priceElement ? priceElement.innerText.replace(/[^0-9.]/g, '') : "0.00";
-        const image = imageElement ? imageElement.src : "";
+            const oldScript = document.getElementById('dynamic-product-schema');
+            if (oldScript) oldScript.remove();
 
-        const productSchema = {
-            "@context": "https://schema.org/",
-            "@type": "Product",
-            "name": name,
-            "image": image ? [image] : [],
-            "description": name, // ניתן להחליף בתיאור מפורט אם קיים אלמנט כזה
-            "sku": productId,
-            "offers": {
-                "@type": "Offer",
-                "url": window.location.href,
-                "priceCurrency": "ILS",
-                "price": price,
-                "itemCondition": "https://schema.org/NewCondition",
-                "availability": "https://schema.org/InStock"
-            }
-        };
-
-        // הסרת סכמה קודמת אם קיימת (למניעת כפילויות במעבר בין מוצרים)
-        const oldScript = document.getElementById('dynamic-product-schema');
-        if (oldScript) oldScript.remove();
-
-        // יצירת תגית הסקריפט החדשה
-        const script = document.createElement('script');
-        script.id = 'dynamic-product-schema';
-        script.type = 'application/ld+json';
-        script.text = JSON.stringify(productSchema);
-        document.head.appendChild(script);
+            const script = document.createElement('script');
+            script.id = 'dynamic-product-schema';
+            script.type = 'application/ld+json';
+            script.text = JSON.stringify(schema);
+            document.head.appendChild(script);
+            
+            // ברגע שהזרקנו בהצלחה, אפשר להפסיק לעקוב
+            observer.disconnect();
+        }
     }
 
-    // הפעלה ברגע שהדף נטען
-    window.addEventListener('load', injectDynamicProductSchema);
-    
-    // אם האתר שלך מחליף מוצרים ללא רענון דף (AJAX), נפעיל את הפונקציה גם בשינויי URL
-    window.addEventListener('popstate', injectDynamicProductSchema);
+    // הגדרת "צופה" שיזהה מתי ה-HTML משתנה (כשהנתונים מגיעים מה-Sheets)
+    const observer = new MutationObserver((mutations) => {
+        injectProductSchema();
+    });
+
+    // התחלת מעקב על גוף הדף
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+
+    // הפעלה ראשונית ליתר ביטחון
+    window.addEventListener('load', injectProductSchema);
 })();
-    
 </script>
 </body>
 </html>
