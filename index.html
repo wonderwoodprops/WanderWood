@@ -193,12 +193,14 @@
 }
 
 
-        .story-section { background: linear-gradient(180deg, #fffdf9 0%, #f8f1e8 100%); position: relative; overflow: hidden; }
+        .story-section { background: linear-gradient(180deg, #fffdf9 0%, #f8f1e8 100%); position: relative; overflow: hidden; padding-bottom: 7rem; }
         .story-glow { position: absolute; width: 420px; height: 420px; border-radius: 999px; filter: blur(90px); opacity: 0.35; pointer-events: none; }
         .story-glow.one { background: #f4d8b2; top: -170px; right: -100px; }
         .story-glow.two { background: #dbc3a2; bottom: -220px; left: -120px; }
         .story-card { background: rgba(255,255,255,0.9); border: 1px solid #eadcc9; border-radius: 1.25rem; box-shadow: 0 16px 40px rgba(61,43,31,0.1); }
         .story-list-item { background: #fff; border: 1px solid #efe3d2; border-radius: 0.9rem; padding: 0.75rem 0.9rem; display: flex; gap: 10px; align-items: center; }
+        .features-merge { background: linear-gradient(180deg, #f8f1e8 0%, #f5ede2 100%); margin-top: -3rem; padding-top: 6.5rem; }
+        .feature-card { background: rgba(255, 255, 255, 0.72); border: 1px solid #eadcc9; border-radius: 1.1rem; padding: 1.75rem 1.2rem; box-shadow: 0 12px 28px rgba(61,43,31,0.08); height: 100%; }
         .faq-item { background: #fff; border: 1px solid #e9dcc8; border-radius: 1rem; overflow: hidden; box-shadow: 0 10px 24px rgba(61,43,31,0.06); transition: 0.25s; }
         .faq-item:hover { transform: translateY(-3px); }
         .faq-question { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 1rem 1.1rem; text-align: right; font-weight: 700; }
@@ -279,10 +281,9 @@
     <span class="story-glow two"></span>
     <div class="max-w-6xl mx-auto relative z-10">
         <div class="story-card p-7 md:p-10 text-right" data-aos="fade-up" data-aos-duration="1000">
-            <p class="inline-flex items-center gap-2 text-sm md:text-base text-[#8a653f] font-bold mb-3">✨ כי לכל פריים מגיעה במה מדויקת</p>
             <h2 class="text-3xl md:text-5xl font-bold mb-5">אביזרי עץ לצילום בהתאמה אישית לצלמות מקצועיות</h2>
-            <p class="text-lg leading-loose text-[#4b3a2d] mb-4" data-aos="fade-up" data-aos-delay="120">ב-WanderWood (וונדרווד) אנחנו יוצרים אביזרי עץ לצילום בהתאמה אישית לצלמות חוץ, צלמות ילדים וסטודיו. כל מוצר נבנה לפי צורך אמיתי בשטח: משקל קל, עמידות גבוהה, ונראות שמוסיפה ערך לכל פריים.</p>
-            <p class="text-lg leading-loose text-[#4b3a2d] mb-6" data-aos="fade-up" data-aos-delay="220">אנחנו מתמחים בפתרונות לצילומי ילדים, צילומי ניו בורן, מיתוג סטים לצילום ואביזרים מתקפלים לעבודה ניידת. ניתן להזמין גם אביזרים ייחודיים לפי סקיצה, צבע, מידה וסגנון צילום.</p>
+            <p class="text-lg leading-loose text-[#4b3a2d] mb-4" data-aos="fade-up" data-aos-delay="120">ב-WanderWood (וונדרווד) אנחנו יוצרים אביזרי עץ בהתאמה אישית לצלמות חוץ, ילדים וסטודיו — עם איזון מדויק בין אסתטיקה, פונקציונליות ועמידות.</p>
+            <p class="text-lg leading-loose text-[#4b3a2d] mb-6" data-aos="fade-up" data-aos-delay="220">כל פריט מתוכנן לעבודה אמיתית בשטח: קל לנשיאה, נוח לתפעול ומותאם לסגנון הצילום שלך.</p>
             <div class="grid sm:grid-cols-2 gap-3" data-aos="zoom-in" data-aos-delay="320">
                 <div class="story-list-item"><span>🌿</span><span>אביזרי עץ לצילום ילדים</span></div>
                 <div class="story-list-item"><span>📸</span><span>אביזרי צילום לצלמות חוץ</span></div>
@@ -293,10 +294,11 @@
     </div>
 </section>
 
-<section id="features" class="py-24 px-10">
+<section id="features" class="features-merge py-24 px-10">
     <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16 text-center">
         
         <div data-aos="fade-up">
+            <div class="feature-card">
             <div class="mb-6 flex justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.2" stroke="#bc986a" class="w-20 h-20 animate-draw">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35m0 0a6.772 6.772 0 0 1-3.044 0" />
@@ -304,9 +306,11 @@
             </div>
             <h3 class="text-2xl font-bold mb-3">עץ מלא נבחר</h3>
             <p class="text-gray-500 leading-relaxed">אנחנו בונים את המוצרים שלנו מעץ אורן איכותי וחזק וצובעים אותם בצבע עמיד ואיכותי.</p>
+            </div>
         </div>
 
         <div data-aos="fade-up" data-aos-delay="150">
+            <div class="feature-card">
             <div class="mb-6 flex justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.2" stroke="#bc986a" class="w-20 h-20 animate-draw">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
@@ -314,9 +318,11 @@
             </div>
             <h3 class="text-2xl font-bold mb-3">התאמה אישית</h3>
             <p class="text-gray-500 leading-relaxed">יש לכם משהו בראש? אנחנו נגשים לכם את החלום עם הסטנדרטים של WanderWood.</p>
+            </div>
         </div>
 
         <div data-aos="fade-up" data-aos-delay="300">
+            <div class="feature-card">
             <div class="mb-6 flex justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.2" stroke="#bc986a" class="w-20 h-20 animate-draw">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 0 1-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0M12 12.75h.008v.008H12v-.008Z" />
@@ -324,6 +330,7 @@
             </div>
             <h3 class="text-2xl font-bold mb-3">קומפקטי ומותאם לנסיעות</h3>
             <p class="text-gray-500 leading-relaxed">פתרונות למזעור הגודל והמשקל לנשיאה נוחה וקלילה גם לצילומי חוץ, תוך הקפדה על חוזק מכני.</p>
+            </div>
         </div>
 
     </div>
