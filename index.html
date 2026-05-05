@@ -21,6 +21,14 @@
     <link rel="canonical" href="https://wonderwoodprops.github.io/WanderWood/">
     <link rel="sitemap" type="application/xml" href="https://wonderwoodprops.github.io/WanderWood/sitemap.xml">
     <title>WanderWood | אביזרי עץ לצילום בהתאמה אישית</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z27XDDTMDB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-Z27XDDTMDB');
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap" rel="stylesheet">
@@ -604,6 +612,18 @@
     let customDraftImages = [];
     let customOrderItems = [];
     const contactPhone = '0556783085';
+    const trackedEvents = new Set();
+
+    function trackEvent(eventName, params = {}) {
+        if (typeof window.gtag !== 'function') return;
+        window.gtag('event', eventName, params);
+    }
+
+    function trackEventOnce(eventKey, eventName, params = {}) {
+        if (trackedEvents.has(eventKey)) return;
+        trackedEvents.add(eventKey);
+        trackEvent(eventName, params);
+    }
 
     async function loadCatalog() {
         try {
@@ -724,6 +744,12 @@
 
         document.getElementById('product-modal').classList.remove('hidden');
         document.getElementById('product-modal').classList.add('flex');
+        trackEvent('view_item', {
+            item_id: product.id,
+            item_name: product.name,
+            currency: 'ILS',
+            value: product.price
+        });
     }
 
     function closeModal() {
@@ -779,6 +805,14 @@
         if (selectedItemInput) {
             selectedItemInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
+
+        trackEvent('add_to_cart', {
+            item_id: product.id,
+            item_name: product.name,
+            currency: 'ILS',
+            value: product.price,
+            quantity: 1
+        });
     }
 
     function changeOrderQty(productId, delta) {
@@ -795,8 +829,18 @@
 
     function removeFromOrder(productId) {
         if (!orderState.has(productId)) return;
+        const removedItem = orderState.get(productId);
         orderState.delete(productId);
         updateOrderSummary();
+        if (removedItem) {
+            trackEvent('remove_from_cart', {
+                item_id: removedItem.id,
+                item_name: removedItem.name,
+                currency: 'ILS',
+                value: removedItem.price,
+                quantity: removedItem.qty
+            });
+        }
     }
 
     function updateOrderSummary() {
@@ -932,6 +976,11 @@
         const product = productCatalog[modalProductIndex];
         if (!product) return;
         const shareUrl = getProductShareUrl();
+        trackEvent('share', {
+            method: navigator.share ? 'native_share' : 'link_copy',
+            item_id: product.id,
+            item_name: product.name
+        });
         if (navigator.share) {
             try {
                 await navigator.share({
@@ -1112,7 +1161,10 @@
     }
 
     function bindCustomProductModal() {
-        document.getElementById('open-custom-product-modal').addEventListener('click', openCustomProductModal);
+        document.getElementById('open-custom-product-modal').addEventListener('click', () => {
+            openCustomProductModal();
+            trackEvent('open_custom_product_modal');
+        });
         document.getElementById('close-custom-product-modal').addEventListener('click', closeCustomProductModal);
         document.getElementById('cancel-custom-product').addEventListener('click', closeCustomProductModal);
         document.querySelector('#custom-product-modal > .absolute').addEventListener('click', closeCustomProductModal);
@@ -1164,6 +1216,10 @@
             });
             updateOrderSummary();
             closeCustomProductModal();
+            trackEvent('add_custom_product_request', {
+                custom_type: typeValue,
+                has_reference_images: customDraftImages.length > 0
+            });
         });
     }
 
@@ -1174,6 +1230,10 @@
         form.addEventListener('submit', async (event) => {
             if (isSubmittingForm) return;
             event.preventDefault();
+            trackEvent('begin_checkout', {
+                currency: 'ILS',
+                value: Number(getOrderTotalForSubmission() || 0)
+            });
 
             if (!validateOrderForm()) return;
             if (uploadInProgress) return;
@@ -1207,11 +1267,19 @@
                 await fetch(endpoint, requestConfig);
 
                 showSuccessModal();
+                trackEvent('generate_lead', {
+                    currency: 'ILS',
+                    value: Number(getOrderTotalForSubmission() || 0)
+                });
             } catch (error) {
                 console.error('שגיאה בשליחת הטופס:', error);
                 const generalError = document.getElementById('form-general-error');
                 generalError.textContent = 'שליחת ההזמנה נכשלה, נסי שוב בעוד רגע.';
                 generalError.classList.remove('hidden');
+                trackEvent('exception', {
+                    description: 'order_form_submission_failed',
+                    fatal: false
+                });
             } finally {
                 isSubmittingForm = false;
                 setSubmitButtonState(submitButton, false, defaultSubmitText);
@@ -1316,6 +1384,10 @@
                 event.preventDefault();
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 history.replaceState(null, '', href);
+                trackEvent('select_content', {
+                    content_type: 'navigation',
+                    content_id: href
+                });
             });
         });
     }
@@ -1444,6 +1516,19 @@
             slides[active].classList.add('active');
         }, 5000);
     }
+
+    document.getElementById('modal-next')?.addEventListener('click', () => {
+        const product = productCatalog[modalProductIndex];
+        if (!product) return;
+        trackEvent('view_item_image_next', { item_id: product.id, image_index: modalImageIndex + 1 });
+    });
+    document.getElementById('modal-prev')?.addEventListener('click', () => {
+        const product = productCatalog[modalProductIndex];
+        if (!product) return;
+        trackEvent('view_item_image_prev', { item_id: product.id, image_index: modalImageIndex + 1 });
+    });
+
+    trackEventOnce('page_view_home', 'page_view', { page_title: document.title, page_path: window.location.pathname });
 
     startHeroBackgrounds();
     syncTopNavState();
