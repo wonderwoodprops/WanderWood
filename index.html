@@ -192,6 +192,21 @@
   animation: drawIcon 3s ease-in-out forwards;
 }
 
+
+        .story-section { background: linear-gradient(180deg, #fffdf9 0%, #f8f1e8 100%); position: relative; overflow: hidden; }
+        .story-glow { position: absolute; width: 420px; height: 420px; border-radius: 999px; filter: blur(90px); opacity: 0.35; pointer-events: none; }
+        .story-glow.one { background: #f4d8b2; top: -170px; right: -100px; }
+        .story-glow.two { background: #dbc3a2; bottom: -220px; left: -120px; }
+        .story-card { background: rgba(255,255,255,0.9); border: 1px solid #eadcc9; border-radius: 1.25rem; box-shadow: 0 16px 40px rgba(61,43,31,0.1); }
+        .story-list-item { background: #fff; border: 1px solid #efe3d2; border-radius: 0.9rem; padding: 0.75rem 0.9rem; display: flex; gap: 10px; align-items: center; }
+        .faq-item { background: #fff; border: 1px solid #e9dcc8; border-radius: 1rem; overflow: hidden; box-shadow: 0 10px 24px rgba(61,43,31,0.06); transition: 0.25s; }
+        .faq-item:hover { transform: translateY(-3px); }
+        .faq-question { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 1rem 1.1rem; text-align: right; font-weight: 700; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+        .faq-item.open .faq-answer { max-height: 180px; }
+        .faq-plus { transition: transform 0.25s ease; }
+        .faq-item.open .faq-plus { transform: rotate(45deg); }
+
         html { scroll-behavior: smooth; }
     </style>
     <script type="application/ld+json">
@@ -259,17 +274,22 @@
     </div>
 </section>
 
-<section id="seo-intro" class="py-16 px-6 md:px-12 bg-white">
-    <div class="max-w-5xl mx-auto text-right">
-        <h2 class="text-3xl md:text-4xl font-bold mb-5">אביזרי עץ לצילום בהתאמה אישית לצלמות מקצועיות</h2>
-        <p class="text-lg leading-relaxed text-[#4b3a2d] mb-4">ב-WanderWood (וונדרווד) אנחנו יוצרים אביזרי עץ לצילום בהתאמה אישית לצלמות חוץ, צלמות ילדים וסטודיו. כל מוצר נבנה לפי צורך אמיתי בשטח: משקל קל, עמידות גבוהה, ונראות שמוסיפה ערך לכל פריים.</p>
-        <p class="text-lg leading-relaxed text-[#4b3a2d] mb-4">אנחנו מתמחים בפתרונות לצילומי ילדים, צילומי ניו בורן, מיתוג סטים לצילום ואביזרים מתקפלים לעבודה ניידת. ניתן להזמין גם אביזרים ייחודיים לפי סקיצה, צבע, מידה וסגנון צילום.</p>
-        <ul class="list-disc pr-6 text-[#6b4e38] leading-loose">
-            <li>אביזרי עץ לצילום ילדים</li>
-            <li>אביזרי צילום לצלמות חוץ</li>
-            <li>תפאורות עץ וסטים בהתאמה אישית</li>
-            <li>פתרונות קלים לנשיאה והקמה מהירה</li>
-        </ul>
+<section id="seo-intro" class="story-section py-20 px-6 md:px-12">
+    <span class="story-glow one"></span>
+    <span class="story-glow two"></span>
+    <div class="max-w-6xl mx-auto relative z-10">
+        <div class="story-card p-7 md:p-10 text-right" data-aos="fade-up" data-aos-duration="1000">
+            <p class="inline-flex items-center gap-2 text-sm md:text-base text-[#8a653f] font-bold mb-3">✨ כי לכל פריים מגיעה במה מדויקת</p>
+            <h2 class="text-3xl md:text-5xl font-bold mb-5">אביזרי עץ לצילום בהתאמה אישית לצלמות מקצועיות</h2>
+            <p class="text-lg leading-loose text-[#4b3a2d] mb-4" data-aos="fade-up" data-aos-delay="120">ב-WanderWood (וונדרווד) אנחנו יוצרים אביזרי עץ לצילום בהתאמה אישית לצלמות חוץ, צלמות ילדים וסטודיו. כל מוצר נבנה לפי צורך אמיתי בשטח: משקל קל, עמידות גבוהה, ונראות שמוסיפה ערך לכל פריים.</p>
+            <p class="text-lg leading-loose text-[#4b3a2d] mb-6" data-aos="fade-up" data-aos-delay="220">אנחנו מתמחים בפתרונות לצילומי ילדים, צילומי ניו בורן, מיתוג סטים לצילום ואביזרים מתקפלים לעבודה ניידת. ניתן להזמין גם אביזרים ייחודיים לפי סקיצה, צבע, מידה וסגנון צילום.</p>
+            <div class="grid sm:grid-cols-2 gap-3" data-aos="zoom-in" data-aos-delay="320">
+                <div class="story-list-item"><span>🌿</span><span>אביזרי עץ לצילום ילדים</span></div>
+                <div class="story-list-item"><span>📸</span><span>אביזרי צילום לצלמות חוץ</span></div>
+                <div class="story-list-item"><span>🪵</span><span>תפאורות עץ וסטים בהתאמה אישית</span></div>
+                <div class="story-list-item"><span>🚗</span><span>פתרונות קלים לנשיאה והקמה מהירה</span></div>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -451,18 +471,18 @@
 <section id="faq" class="py-20 px-6 md:px-12 bg-[#f7f3ec]">
     <div class="max-w-5xl mx-auto">
         <h2 class="text-3xl md:text-4xl font-bold mb-8 text-right">שאלות נפוצות על אביזרי עץ לצילום</h2>
-        <div class="space-y-5 text-right">
-            <article>
-                <h3 class="font-bold text-xl mb-2">למי מתאימים המוצרים של WanderWood?</h3>
-                <p class="text-[#6b4e38]">המוצרים מתאימים לצלמות חוץ, צלמות ילדים, צלמות ניו בורן ויוצרות תוכן שצריכות אביזרי צילום מעץ בעיצוב אישי.</p>
+        <div class="space-y-4 text-right" id="faq-list">
+            <article class="faq-item" data-aos="fade-up">
+                <button type="button" class="faq-question"><span class="inline-flex items-center gap-2"><span>👩‍🎨</span>למי מתאימים המוצרים של WanderWood?</span><span class="faq-plus text-2xl text-[#bc986a]">+</span></button>
+                <div class="faq-answer"><p class="text-[#6b4e38] px-4 pb-4">המוצרים מתאימים לצלמות חוץ, צלמות ילדים, צלמות ניו בורן ויוצרות תוכן שצריכות אביזרי צילום מעץ בעיצוב אישי.</p></div>
             </article>
-            <article>
-                <h3 class="font-bold text-xl mb-2">אפשר להזמין אביזרי צילום לפי מידה?</h3>
-                <p class="text-[#6b4e38]">כן. ניתן להזמין בהתאמה אישית מלאה כולל מידות, צבע, גימור וייעוד מקצועי לפי סוג הצילומים שלך.</p>
+            <article class="faq-item" data-aos="fade-up" data-aos-delay="120">
+                <button type="button" class="faq-question"><span class="inline-flex items-center gap-2"><span>📐</span>אפשר להזמין אביזרי צילום לפי מידה?</span><span class="faq-plus text-2xl text-[#bc986a]">+</span></button>
+                <div class="faq-answer"><p class="text-[#6b4e38] px-4 pb-4">כן. ניתן להזמין בהתאמה אישית מלאה כולל מידות, צבע, גימור וייעוד מקצועי לפי סוג הצילומים שלך.</p></div>
             </article>
-            <article>
-                <h3 class="font-bold text-xl mb-2">האם האביזרים מתאימים גם לצילומי חוץ?</h3>
-                <p class="text-[#6b4e38]">בהחלט. אנחנו מתכננים מוצרים קומפקטיים, עמידים ונוחים לנשיאה, במיוחד לעבודה דינמית מחוץ לסטודיו.</p>
+            <article class="faq-item" data-aos="fade-up" data-aos-delay="220">
+                <button type="button" class="faq-question"><span class="inline-flex items-center gap-2"><span>🌤️</span>האם האביזרים מתאימים גם לצילומי חוץ?</span><span class="faq-plus text-2xl text-[#bc986a]">+</span></button>
+                <div class="faq-answer"><p class="text-[#6b4e38] px-4 pb-4">בהחלט. אנחנו מתכננים מוצרים קומפקטיים, עמידים ונוחים לנשיאה, במיוחד לעבודה דינמית מחוץ לסטודיו.</p></div>
             </article>
         </div>
     </div>
@@ -563,7 +583,14 @@
 <script>
     AOS.init({ duration: 1000, once: true });
 
-    const TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTtyoe510f5vB5u1jW6b_VdZaCl2N_5IMO3i07jQB6P7YOtadif2C2otzqmWS5o34E-pIXDHVfX0fdf/pub?output=tsv';
+    document.querySelectorAll('#faq-list .faq-item').forEach((item) => {
+        const btn = item.querySelector('.faq-question');
+        btn?.addEventListener('click', () => {
+            item.classList.toggle('open');
+        });
+    });
+
+    const PRODUCTS_JSON_URL = './products.json';
     const TESTIMONIALS_TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTtyoe510f5vB5u1jW6b_VdZaCl2N_5IMO3i07jQB6P7YOtadif2C2otzqmWS5o34E-pIXDHVfX0fdf/pub?gid=1394850774&single=true&output=tsv';
 
     const productCatalog = [];
@@ -580,35 +607,23 @@
 
     async function loadCatalog() {
         try {
-            const response = await fetch(TSV_URL);
-            const data = await response.text();
-            const rows = data.split('\n').slice(1);
+            const response = await fetch(PRODUCTS_JSON_URL, { cache: 'no-store' });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const items = await response.json();
             const grid = document.getElementById('product-grid');
             grid.innerHTML = '';
 
-            rows.forEach((row) => {
-                const columns = row.split('\t');
-                if (columns.length < 4) return;
-
-                const [nameRaw, priceRaw, descriptionRaw, imageUrlsRaw] = columns;
-                const name = (nameRaw || '').trim();
-                const description = (descriptionRaw || '')
-    .trim()
-    .replace(/\s\s+/g, '\n');
-                const numericPrice = Number((priceRaw || '').replace(/[^\d.]/g, '')) || 0;
-                const images = (imageUrlsRaw || '')
-                    .split(',')
-                    .map((url) => url.trim())
-                    .filter(Boolean);
-
+            const normalizedItems = Array.isArray(items) ? items : [];
+            normalizedItems.forEach((item, index) => {
+                const name = (item?.name || '').toString().trim();
                 if (!name) return;
 
                 const product = {
-                    id: `p-${productCatalog.length}`,
+                    id: (item?.id || `p-${index}`).toString(),
                     name,
-                    description,
-                    price: numericPrice,
-                    images: images.length ? images : ['https://placehold.co/600x400?text=WanderWood']
+                    description: (item?.description || '').toString().trim().replace(/\s\s+/g, '\n'),
+                    price: Number(item?.price) || 0,
+                    images: Array.isArray(item?.images) && item.images.length ? item.images : ['https://placehold.co/600x400?text=WanderWood']
                 };
 
                 productCatalog.push(product);

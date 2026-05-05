@@ -1,0 +1,33 @@
+name: Sync products from Google Sheets
+
+on:
+  repository_dispatch:
+    types: [products_sync]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-products:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build products.json from Google Sheets TSV
+        env:
+          PRODUCTS_TSV_URL: https://docs.google.com/spreadsheets/d/e/2PACX-1vTtyoe510f5vB5u1jW6b_VdZaCl2N_5IMO3i07jQB6P7YOtadif2C2otzqmWS5o34E-pIXDHVfX0fdf/pub?output=tsv
+        run: node scripts/sync-products.mjs
+      - name: Commit products.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add products.json
+          if git diff --cached --quiet; then
+            echo "No products changes to commit."
+            exit 0
+          fi
+          git commit -m "chore: sync products.json from Google Sheets"
+          git push
