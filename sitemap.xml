@@ -3,65 +3,34 @@
 
   <url>
     <loc>https://wonderwoodprops.github.io/WanderWood/</loc>
-    <lastmod>2026-05-04</lastmod>
+    <lastmod>2026-05-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://wonderwoodprops.github.io/WanderWood/?product=p-0#collection</loc>
-    <lastmod>2026-05-04</lastmod>
+    <loc>https://wonderwoodprops.github.io/WanderWood/?product=little-wanderer-bench-%D7%A1%D7%A4%D7%A1%D7%9C-%D7%A6%D7%99%D7%9C%D7%95%D7%9D-%D7%9E%D7%AA%D7%A7%D7%A4%D7%9C-%D7%9C%D7%99%D7%9C%D7%93%D7%99%D7%9D-60-%D7%A1%D7%9E</loc>
+    <lastmod>2026-05-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-1#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-2#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-3#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-4#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-5#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-6#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-7#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-8#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-9#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-10#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-11#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-12#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-13#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-14#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-15#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-16#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-17#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-18#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-19#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-20#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-21#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-22#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-23#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-24#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-25#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-26#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-27#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-28#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-29#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-30#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-31#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-32#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-33#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-34#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-35#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-36#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-37#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-38#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-39#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-40#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-41#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-42#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-43#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-44#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-45#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-46#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-47#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-48#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
-  <url><loc>https://wonderwoodprops.github.io/WanderWood/?product=p-49#collection</loc><lastmod>2026-05-04</lastmod><priority>0.8</priority></url>
+  <url>
+    <loc>https://wonderwoodprops.github.io/WanderWood/?product=pixie-stool-%D7%A9%D7%A8%D7%A4%D7%A8%D7%A3-%D7%A6%D7%99%D7%9C%D7%95%D7%9D-%D7%A7%D7%95%D7%9E%D7%A4%D7%A7%D7%98%D7%99-30-%D7%A1%D7%9E</loc>
+    <lastmod>2026-05-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://wonderwoodprops.github.io/WanderWood/?product=krama-baby-chair-%D7%9B%D7%99%D7%A1%D7%90-%D7%AA%D7%99%D7%A0%D7%95%D7%A7-%D7%A7%D7%98%D7%9F-35-%D7%A1%D7%9E</loc>
+    <lastmod>2026-05-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://wonderwoodprops.github.io/WanderWood/?product=the-light-step-chair-%D7%9B%D7%99%D7%A1%D7%90-%D7%A6%D7%99%D7%9C%D7%95%D7%9D-%D7%93%D7%95-%D7%9E%D7%A6%D7%91%D7%99</loc>
+    <lastmod>2026-05-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
 
 </urlset>
