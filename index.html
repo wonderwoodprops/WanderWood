@@ -613,6 +613,15 @@
     let customOrderItems = [];
     const contactPhone = '0556783085';
     const trackedEvents = new Set();
+    const SITE_BASE_URL = 'https://wonderwoodprops.github.io/WanderWood/';
+    const defaultSeo = {
+        title: 'WanderWood | אביזרי עץ לצילום בהתאמה אישית',
+        description: 'WanderWood מתמחה באביזרי עץ לצילום בהתאמה אישית: אביזרי צילום לילדים, פתרונות לצלמות חוץ, סטים לצילומי ניו בורן ואביזרי פרימיום לצילום מקצועי.',
+        ogTitle: 'WanderWood | אביזרי עץ לצילום בהתאמה אישית',
+        ogDescription: 'אביזרי עץ ייחודיים לצלמות: צילום ילדים, צילומי חוץ והזמנות אישיות לפי מידה.',
+        twitterTitle: 'WanderWood | אביזרי עץ לצילום בהתאמה אישית',
+        twitterDescription: 'אביזרי עץ לצילום ילדים וצילומי חוץ, בהתאמה אישית ובעבודת יד.'
+    };
 
     function trackEvent(eventName, params = {}) {
         if (typeof window.gtag !== 'function') return;
@@ -623,6 +632,54 @@
         if (trackedEvents.has(eventKey)) return;
         trackedEvents.add(eventKey);
         trackEvent(eventName, params);
+    }
+
+
+    function slugifyProductName(name) {
+        return (name || '')
+            .toString()
+            .trim()
+            .toLowerCase()
+            .replace(/["'׳״]/g, '')
+            .replace(/[^\p{L}\p{N}]+/gu, '-')
+            .replace(/^-+|-+$/g, '');
+    }
+
+    function buildProductUrl(product) {
+        const url = new URL(SITE_BASE_URL);
+        const slug = product?.slug || product?.id;
+        url.searchParams.set('product', slug);
+        return url.toString();
+    }
+
+    function updateSeoForProduct(product) {
+        const canonicalHref = product ? buildProductUrl(product) : SITE_BASE_URL;
+        const title = product ? `${product.name} - WanderWood` : defaultSeo.title;
+        const description = product
+            ? `${product.name} של WanderWood: ${product.description || 'אביזר עץ איכותי בהתאמה אישית לצילום מקצועי.'}`.slice(0, 300)
+            : defaultSeo.description;
+
+        document.title = title;
+        const canonical = document.querySelector('link[rel="canonical"]');
+        if (canonical) canonical.setAttribute('href', canonicalHref);
+
+        const metaDescription = document.querySelector('meta[name="description"]');
+        if (metaDescription) metaDescription.setAttribute('content', description);
+
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) ogTitle.setAttribute('content', product ? title : defaultSeo.ogTitle);
+
+        const ogDescription = document.querySelector('meta[property="og:description"]');
+        if (ogDescription) ogDescription.setAttribute('content', product ? description : defaultSeo.ogDescription);
+
+        const ogUrl = document.querySelector('meta[property="og:url"]');
+        if (ogUrl) ogUrl.setAttribute('content', canonicalHref);
+
+        const twitterTitle = document.querySelector('meta[name="twitter:title"]');
+        if (twitterTitle) twitterTitle.setAttribute('content', product ? title : defaultSeo.twitterTitle);
+
+        const twitterDescription = document.querySelector('meta[name="twitter:description"]');
+        if (twitterDescription) twitterDescription.setAttribute('content', product ? description : defaultSeo.twitterDescription);
     }
 
     async function loadCatalog() {
@@ -645,6 +702,7 @@
                     price: Number(item?.price) || 0,
                     images: Array.isArray(item?.images) && item.images.length ? item.images : ['https://placehold.co/600x400?text=WanderWood']
                 };
+                product.slug = slugifyProductName(item?.slug || product.name) || product.id;
 
                 productCatalog.push(product);
             });
@@ -741,6 +799,7 @@
         updateModalAddButton();
         updateModalImage();
         syncProductUrl(product);
+        updateSeoForProduct(product);
 
         document.getElementById('product-modal').classList.remove('hidden');
         document.getElementById('product-modal').classList.add('flex');
@@ -756,6 +815,7 @@
         document.getElementById('product-modal').classList.add('hidden');
         document.getElementById('product-modal').classList.remove('flex');
         clearProductUrl();
+        updateSeoForProduct(null);
     }
 
     function updateModalImage() {
@@ -955,7 +1015,7 @@
     function syncProductUrl(product) {
         if (!product) return;
         const url = new URL(window.location.href);
-        url.searchParams.set('product', product.id);
+        url.searchParams.set('product', product.slug || product.id);
         window.history.replaceState({}, '', url.toString());
     }
 
@@ -968,7 +1028,7 @@
     function getProductShareUrl() {
         const url = new URL(window.location.href);
         const product = productCatalog[modalProductIndex];
-        if (product) url.searchParams.set('product', product.id);
+        if (product) url.searchParams.set('product', product.slug || product.id);
         return url.toString();
     }
 
@@ -1006,7 +1066,7 @@
         const url = new URL(window.location.href);
         const productId = url.searchParams.get('product');
         if (!productId) return;
-        const productIndex = productCatalog.findIndex((item) => item.id === productId);
+        const productIndex = productCatalog.findIndex((item) => item.id === productId || item.slug === productId);
         if (productIndex >= 0) openModal(productIndex);
     }
 
