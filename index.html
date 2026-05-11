@@ -266,7 +266,7 @@
     <ul class="hidden md:flex gap-8 font-medium">
         <li><a href="#features" class="smooth-link hover:text-[#bc986a] transition">למה אנחנו?</a></li>
         <li><a href="#about" class="smooth-link hover:text-[#bc986a] transition">קצת עליי</a></li>
-        <li><a href="#collection" class="smooth-link hover:text-[#bc986a] transition">קולקציה</a></li>
+        <li><a href="#collection" class="smooth-link hover:text-[#bc986a] transition">מוצרים</a></li>
         <li><a href="#testimonials" class="smooth-link hover:text-[#bc986a] transition">המלצות</a></li>
         <li><a href="#order-form" class="smooth-link hover:text-[#bc986a] transition">הזמנה אישית</a></li>
     </ul>
@@ -274,13 +274,11 @@
 
 <section id="home" class="h-screen hero-gradient flex items-center justify-center text-center text-white px-4">
     <div class="hero-bg-layer active" data-hero-slide style="background-image:url('https://images.unsplash.com/photo-1648212947347-0703c653e06a?w=1600&auto=format&fit=crop&q=80')"></div>
-    <div class="hero-bg-layer" data-hero-slide style="background-image:url('https://i.ibb.co/7x2yFzgz/IMG-8726.jpg')"></div>
-    <div class="hero-bg-layer" data-hero-slide style="background-image:url('https://i.ibb.co/5gNmxcMW/IMG-8707.jpg')"></div>
     <div data-aos="fade-up" data-aos-duration="1000">
         <h1 class="text-5xl md:text-7xl font-bold mb-6">אמנות בעץ לכל פריים</h1>
         <p class="text-xl md:text-2xl mb-8 max-w-2xl mx-auto font-light">מוצרי עץ בעבודת יד בעיצוב אישי שמשדרגים כל תמונה לסטנדרט פרימיום.</p>
         <div class="flex flex-col md:flex-row gap-4 justify-center">
-            <a href="#collection" class="smooth-link btn-gold px-10 py-4 text-lg font-bold shadow-lg">צפה בקולקציה</a>
+            <a href="#collection" class="smooth-link btn-gold px-10 py-4 text-lg font-bold shadow-lg">צפה במוצרים</a>
             <a href="#order-form" class="smooth-link bg-white text-black px-10 py-4 rounded-lg text-lg font-bold hover:bg-gray-100 transition shadow-lg">הזמנה לפי מידה</a>
         </div>
     </div>
@@ -383,7 +381,7 @@
 <section id="collection" class="bg-[#ded1c3] py-24 px-6 md:px-12">
     <div class="max-w-7xl mx-auto">
         <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold mb-2">הקולקציה שלנו</h2>
+            <h2 class="text-4xl font-bold mb-2">מוצרים שהוזמנו אצלנו</h2>
             <p class="mt-4 text-sm md:text-base text-gray-500 max-w-3xl mx-auto">המחירים באתר הם אינדיקציה כללית בלבד. המחיר הסופי גמיש ומושפע מפרמטרים טכניים משתנים וממורכבות העבודה.</p>
         </div>
         <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 min-h-[400px]">
@@ -609,7 +607,7 @@
         </span>
         <h3 class="text-2xl font-bold text-[#3d2b1f] mb-3">לא מצאת בדיוק מה שחיפשת?</h3>
         <p class="text-[#6b4e38] leading-relaxed mb-6">
-            אנחנו מייצרות גם מוצרים בהתאמה אישית לצרכים המדויקים שלך — מידות, צבעים ושימושים מיוחדים לצילום.
+            אני מייצרת גם מוצרים בהתאמה אישית לצרכים המדויקים שלך — מידות, צבעים ושימושים מיוחדים לצילום.
             אפשר להשאיר בקשה קצרה ונחזור אלייך עם פתרון מותאם.
         </p>
         <div class="flex flex-col sm:flex-row gap-3">
@@ -668,6 +666,43 @@
         trackEvent(eventName, params);
     }
 
+
+
+    function buildAnalyticsItems() {
+        const items = [];
+        orderState.forEach((item) => {
+            items.push({
+                item_id: item.id,
+                item_name: item.name,
+                price: Number(item.price) || 0,
+                quantity: Number(item.qty) || 1,
+                item_category: 'catalog'
+            });
+        });
+
+        customOrderItems.forEach((item, index) => {
+            items.push({
+                item_id: item.id || `custom-${index + 1}`,
+                item_name: item.type || `מוצר מותאם אישית ${index + 1}`,
+                price: Number(item.price) || 0,
+                quantity: 1,
+                item_category: 'custom'
+            });
+        });
+
+        return items;
+    }
+
+    function buildLeadEventPayload() {
+        const items = buildAnalyticsItems();
+        const value = Number(getOrderTotalForSubmission() || 0);
+        return {
+            currency: 'ILS',
+            value,
+            items,
+            items_count: items.reduce((sum, current) => sum + (Number(current.quantity) || 0), 0)
+        };
+    }
 
     function slugifyProductName(name) {
         return (name || '')
@@ -1079,7 +1114,7 @@
             try {
                 await navigator.share({
                     title: `${product.name} | WanderWood`,
-                    text: `צפי במוצר ${product.name} מתוך הקולקציה של WanderWood`,
+                    text: `צפי במוצר ${product.name} מתוך המוצרים של WanderWood`,
                     url: shareUrl
                 });
                 return;
@@ -1256,7 +1291,7 @@
                             openCustomSuggestionModal();
                             sessionStorage.setItem('customSuggestionShown', '1');
                             trackEvent('show_custom_product_suggestion');
-                        }, 18000);
+                        }, 10000);
                     }
                 } else {
                     hasCollectionBeenSeen = false;
@@ -1376,10 +1411,7 @@
         form.addEventListener('submit', async (event) => {
             if (isSubmittingForm) return;
             event.preventDefault();
-            trackEvent('begin_checkout', {
-                currency: 'ILS',
-                value: Number(getOrderTotalForSubmission() || 0)
-            });
+            trackEvent('begin_checkout', buildLeadEventPayload());
 
             if (!validateOrderForm()) return;
             if (uploadInProgress) return;
@@ -1413,9 +1445,19 @@
                 await fetch(endpoint, requestConfig);
 
                 showSuccessModal();
+                const leadPayload = buildLeadEventPayload();
+                const transactionId = `lead-${Date.now()}`;
+
                 trackEvent('generate_lead', {
-                    currency: 'ILS',
-                    value: Number(getOrderTotalForSubmission() || 0)
+                    ...leadPayload,
+                    lead_type: 'order_request',
+                    method: 'website_form'
+                });
+
+                trackEvent('purchase', {
+                    ...leadPayload,
+                    transaction_id: transactionId,
+                    affiliation: 'WanderWood Quote Request'
                 });
             } catch (error) {
                 console.error('שגיאה בשליחת הטופס:', error);
