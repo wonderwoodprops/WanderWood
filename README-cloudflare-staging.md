@@ -60,15 +60,6 @@ Before deployment, set the two secrets above on the staging Worker. The R2 bucke
 
 The staging admin interface is served at `/admin/`. It manages products and testimonials in the staging D1 database and uploads catalog images to the existing private R2 bucket.
 
-Before using it, protect the admin hostname with a Cloudflare Access self-hosted application and an allow policy for the administrator's email. The Access application must cover both paths:
+The admin page uses a single eight-character password. Set the Worker Secret `ADMIN_PASSWORD` on the staging Worker to an eight-character value. Do not put the password in repository files or share it in chat. The Worker issues an HttpOnly, Secure, SameSite=Strict session cookie that expires after 12 hours. Changing the secret invalidates existing sessions. Since an eight-character password is basic protection, use a non-obvious mix of letters, numbers, and symbols, and consider a Cloudflare rate-limit rule for `POST /api/admin/login`.
 
-- `/admin*`
-- `/api/admin/*`
-
-Configure these Worker variables on the staging Worker (use the Access application values, not values from a different Access application):
-
-- `CF_ACCESS_TEAM_DOMAIN`: the team domain, for example `your-team.cloudflareaccess.com` (without `https://`).
-- `CF_ACCESS_AUD`: the Access application's AUD tag.
-- `ADMIN_EMAILS`: comma-separated list of the exact administrator email addresses allowed to edit the catalog.
-
-The Worker verifies the Cloudflare Access JWT signature, issuer, audience, expiry, and administrator email. Do not expose the admin routes without Cloudflare Access protection. Product and testimonial deletion is currently implemented as hide/show, not permanent deletion. Uploaded catalog images are stored in R2 and use signed media URLs.
+Product and testimonial deletion is currently implemented as hide/show, not permanent deletion. Uploaded catalog images are stored in R2 and use signed media URLs.
