@@ -5,7 +5,13 @@
     <script>
       (function () {
         var product = new URLSearchParams(window.location.search).get('product');
-        if (!product) return;
+        var newSite = 'https://wanderwood.wonderwoodprops.workers.dev/';
+
+        // The legacy homepage now leads to the new homepage as well.
+        if (!product) {
+          window.location.replace(newSite);
+          return;
+        }
 
         var destinationByLegacyId = {
           'p-0': 'little-wanderer-bench',
@@ -35,7 +41,6 @@
         }
         if (typeof destinationSlug === 'undefined') return;
 
-        var newSite = 'https://wanderwood.wonderwoodprops.workers.dev/';
         var destination = destinationSlug
           ? newSite + '?product=' + encodeURIComponent(destinationSlug)
           : newSite;
