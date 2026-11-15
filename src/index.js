@@ -177,7 +177,7 @@ async function handleOrder(request, env) {
 
 async function renderPage(request, env) {
   const url = new URL(request.url);
-  const assetUrl = new URL("/index.html", url.origin);
+  const assetUrl = new URL("/", url.origin);
   const asset = await env.ASSETS.fetch(new Request(assetUrl, request));
   if (!asset.ok) return asset;
   let html = await asset.text();
