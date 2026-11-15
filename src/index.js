@@ -263,7 +263,7 @@ export default {
       if (request.method === "POST" && url.pathname === "/api/orders") return await handleOrder(request, env);
       if (request.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html")) return await renderPage(request, env);
       if (request.method === "GET" && url.pathname === "/robots.txt") {
-        return new Response("User-agent: *\nAllow: /\nSitemap: ${url.origin}/sitemap.xml\n", {
+        return new Response(`User-agent: *\nAllow: /\nSitemap: ${url.origin}/sitemap.xml\n`, {
           headers: { "content-type": "text/plain; charset=utf-8" }
         });
       }
