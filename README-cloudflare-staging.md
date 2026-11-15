@@ -17,12 +17,26 @@ This branch contains the isolated Cloudflare migration. The existing `main` bran
 
 The D1 database was created separately from production and seeded with 8 products and 3 testimonials. No live site data is read or modified.
 
+## First staging deployment
+
+Create a new Worker from this Git repository in Cloudflare:
+
+1. Open Workers & Pages > Create application > GitHub.
+2. Select `wonderwoodprops/WanderWood`.
+3. Select branch `cloudflare-d1-migration`.
+4. Set the Worker name to exactly `wanderwood-staging` (it must match `name` in `wrangler.jsonc`).
+5. Leave the build command empty and use `npx wrangler deploy` as the deploy command.
+
+This must create a separate staging Worker. Do not connect the `main` branch or the production domain.
+
 ## Required Worker secrets
 
-Set these as Worker secrets, never in source code:
+After the Worker has been created, add these under Settings > Variables and Secrets as encrypted **Secrets**, never as plain variables or source code:
 
-- `ORDERS_SCRIPT_URL`: existing Google Apps Script Web App URL for order handling.
+- `ORDERS_SCRIPT_URL`: the existing Google Apps Script Web App URL for order handling.
 - `UPLOAD_SIGNING_SECRET`: a random secret of at least 32 bytes used to sign private customer-image links.
+
+The existing Apps Script URL should be copied from the previous configuration; do not change the order spreadsheet or mail script.
 
 ## R2 bucket
 
