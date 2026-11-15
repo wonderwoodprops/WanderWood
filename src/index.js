@@ -264,7 +264,7 @@ async function verifyAdminRequest(request, env) {
     const claims = JSON.parse(new TextDecoder().decode(base64UrlToBytes(parts[1])));
     const issuer = "https://" + team;
     const now = Math.floor(Date.now() / 1000);
-    if (claims.iss !== issuer || !claims.exp || claims.exp < now || (claims.nbf && claims.nbf > now)) throw new Error("invalid claims");
+    if (header.alg !== "RS256" || claims.iss !== issuer || !claims.exp || claims.exp < now || (claims.nbf && claims.nbf > now)) throw new Error("invalid claims");
     const aud = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
     if (!aud.includes(audience)) throw new Error("invalid audience");
     const certResponse = await fetch(issuer + "/cdn-cgi/access/certs");
@@ -313,10 +313,11 @@ async function adminSaveProduct(request, env, id = null) {
   const description = String(data.description || "").trim().slice(0, 5000);
   const active = data.is_active === false || data.is_active === 0 ? 0 : 1;
   if (id) {
-    const existing = await env.DB.prepare("SELECT id FROM products WHERE id = ?").bind(id).first();
+    const existing = await env.DB.prepare("SELECT id, name, slug FROM products WHERE id = ?").bind(id).first();
     if (!existing) return json({ ok: false, error: "המוצר לא נמצא." }, 404);
+    const slug = existing.name === name ? existing.slug : adminSlug(name, id);
     await env.DB.prepare("UPDATE products SET name=?, slug=?, price=?, description=?, images_json=?, is_active=?, updated_at=CURRENT_TIMESTAMP WHERE id=?")
-      .bind(name, adminSlug(name, id), Math.round(price), description, JSON.stringify(images), active, id).run();
+      .bind(name, slug, Math.round(price), description, JSON.stringify(images), active, id).run();
   } else {
     const newId = crypto.randomUUID();
     const orderRow = await env.DB.prepare("SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM products").first();
@@ -383,6 +384,7 @@ export default {
       if (url.pathname === "/admin/" || url.pathname.startsWith("/api/admin/")) {
         const auth = await verifyAdminRequest(request, env);
         if (auth.error) return auth.error;
+        if (request.method !== "GET" && request.headers.get("Origin") !== url.origin) return json({ ok: false, error: "הבקשה נדחתה." }, 403);
         if (url.pathname === "/admin/") return env.ASSETS.fetch(new Request(new URL("/admin/", url.origin), request));
         if (request.method === "GET" && url.pathname === "/api/admin/session") return json({ ok: true, email: auth.email });
         if (url.pathname === "/api/admin/products" && request.method === "GET") return json(await adminListProducts(env));
