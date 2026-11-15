@@ -243,10 +243,165 @@ async function renderPage(request, env) {
   });
 }
 
+
+// --- Admin authentication and catalog management ---
+function base64UrlToBytes(value) {
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized + "=".repeat((4 - normalized.length % 4) % 4);
+  return Uint8Array.from(atob(padded), (char) => char.charCodeAt(0));
+}
+
+async function verifyAdminRequest(request, env) {
+  const team = String(env.CF_ACCESS_TEAM_DOMAIN || "").replace(/^https?:\/\//, "").replace(/\/$/, "");
+  const audience = String(env.CF_ACCESS_AUD || "");
+  if (!team || !audience || !env.ADMIN_EMAILS) return { error: json({ ok: false, error: "אימות מנהל עדיין לא הוגדר בשרת." }, 503) };
+  const token = request.headers.get("Cf-Access-Jwt-Assertion");
+  if (!token) return { error: json({ ok: false, error: "נדרשת התחברות מנהל דרך Cloudflare Access." }, 401) };
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) throw new Error("invalid token");
+    const header = JSON.parse(new TextDecoder().decode(base64UrlToBytes(parts[0])));
+    const claims = JSON.parse(new TextDecoder().decode(base64UrlToBytes(parts[1])));
+    const issuer = "https://" + team;
+    const now = Math.floor(Date.now() / 1000);
+    if (claims.iss !== issuer || !claims.exp || claims.exp < now || (claims.nbf && claims.nbf > now)) throw new Error("invalid claims");
+    const aud = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
+    if (!aud.includes(audience)) throw new Error("invalid audience");
+    const certResponse = await fetch(issuer + "/cdn-cgi/access/certs");
+    if (!certResponse.ok) throw new Error("certificates unavailable");
+    const certs = await certResponse.json();
+    const jwk = (certs.keys || []).find((key) => key.kid === header.kid);
+    if (!jwk) throw new Error("signing key not found");
+    const publicKey = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
+    const valid = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", publicKey, base64UrlToBytes(parts[2]), new TextEncoder().encode(parts[0] + "." + parts[1]));
+    if (!valid) throw new Error("invalid signature");
+    const email = String(claims.email || "").toLowerCase();
+    const allowed = String(env.ADMIN_EMAILS).split(",").map((item) => item.trim().toLowerCase()).filter(Boolean);
+    if (!email || !allowed.includes(email)) return { error: json({ ok: false, error: "לחשבון הזה אין הרשאת מנהל." }, 403) };
+    return { email };
+  } catch (error) {
+    console.error("Admin authentication failed:", error instanceof Error ? error.message : String(error));
+    return { error: json({ ok: false, error: "האימות נכשל. יש להתחבר מחדש." }, 401) };
+  }
+}
+
+function adminSlug(name, id) {
+  const slug = String(name || "").normalize("NFKC").toLowerCase().trim()
+    .replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 90);
+  return (slug || "item") + "-" + id.slice(0, 8);
+}
+
+function parseImageList(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => String(item || "").trim()).filter((item) => {
+    try { const u = new URL(item); return (u.protocol === "https:" || u.protocol === "http:") && item.length <= 2048; }
+    catch { return false; }
+  }).slice(0, 20);
+}
+
+async function adminListProducts(env) {
+  const { results = [] } = await env.DB.prepare("SELECT id, slug, name, price, description, images_json, sort_order, is_active FROM products ORDER BY sort_order ASC, name ASC").all();
+  return results.map((row) => ({ ...row, price: Number(row.price) || 0, images: safeImages(row.images_json), is_active: Boolean(row.is_active) }));
+}
+
+async function adminSaveProduct(request, env, id = null) {
+  const data = await request.json();
+  const name = String(data.name || "").trim();
+  const price = Number(data.price);
+  if (!name || name.length > 180 || !Number.isFinite(price) || price < 0 || price > 10000000) return json({ ok: false, error: "יש להזין שם מוצר ומחיר תקין." }, 400);
+  const images = parseImageList(data.images);
+  const description = String(data.description || "").trim().slice(0, 5000);
+  const active = data.is_active === false || data.is_active === 0 ? 0 : 1;
+  if (id) {
+    const existing = await env.DB.prepare("SELECT id FROM products WHERE id = ?").bind(id).first();
+    if (!existing) return json({ ok: false, error: "המוצר לא נמצא." }, 404);
+    await env.DB.prepare("UPDATE products SET name=?, slug=?, price=?, description=?, images_json=?, is_active=?, updated_at=CURRENT_TIMESTAMP WHERE id=?")
+      .bind(name, adminSlug(name, id), Math.round(price), description, JSON.stringify(images), active, id).run();
+  } else {
+    const newId = crypto.randomUUID();
+    const orderRow = await env.DB.prepare("SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM products").first();
+    await env.DB.prepare("INSERT INTO products (id, slug, name, price, description, images_json, sort_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+      .bind(newId, adminSlug(name, newId), name, Math.round(price), description, JSON.stringify(images), Number(orderRow?.next_order || 1), active).run();
+    id = newId;
+  }
+  return json({ ok: true, id });
+}
+
+async function adminListTestimonials(env) {
+  const { results = [] } = await env.DB.prepare("SELECT id, name, contact, content, images_json, sort_order, is_active FROM testimonials ORDER BY sort_order ASC").all();
+  return results.map((row) => ({ ...row, images: safeImages(row.images_json), is_active: Boolean(row.is_active) }));
+}
+
+async function adminSaveTestimonial(request, env, id = null) {
+  const data = await request.json();
+  const name = String(data.name || "").trim();
+  const content = String(data.content || "").trim();
+  const contact = String(data.contact || "").trim().slice(0, 180);
+  if (!name || name.length > 180 || !content || content.length > 5000) return json({ ok: false, error: "יש להזין שם ותוכן המלצה." }, 400);
+  const images = parseImageList(data.images);
+  const active = data.is_active === false || data.is_active === 0 ? 0 : 1;
+  if (id) {
+    const existing = await env.DB.prepare("SELECT id FROM testimonials WHERE id = ?").bind(id).first();
+    if (!existing) return json({ ok: false, error: "ההמלצה לא נמצאה." }, 404);
+    await env.DB.prepare("UPDATE testimonials SET name=?, contact=?, content=?, images_json=?, is_active=?, updated_at=CURRENT_TIMESTAMP WHERE id=?")
+      .bind(name, contact, content, JSON.stringify(images), active, id).run();
+  } else {
+    const newId = crypto.randomUUID();
+    const orderRow = await env.DB.prepare("SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM testimonials").first();
+    await env.DB.prepare("INSERT INTO testimonials (id, name, contact, content, images_json, sort_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)")
+      .bind(newId, name, contact, content, JSON.stringify(images), Number(orderRow?.next_order || 1), active).run();
+    id = newId;
+  }
+  return json({ ok: true, id });
+}
+
+async function adminUpload(request, env, url) {
+  if (!env.UPLOADS || !env.UPLOAD_SIGNING_SECRET) return json({ ok: false, error: "אחסון התמונות לא הוגדר במלואו." }, 503);
+  const form = await request.formData();
+  const file = form.get("image");
+  if (!(file instanceof File)) return json({ ok: false, error: "לא נבחר קובץ תמונה." }, 400);
+  const allowed = new Set(["image/jpeg", "image/png", "image/webp"]);
+  if (!allowed.has(file.type) || file.size > 15 * 1024 * 1024) return json({ ok: false, error: "אפשר להעלות תמונת JPG, PNG או WEBP עד 15MB." }, 415);
+  const bytes = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+  const validJpeg = bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  const validPng = bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
+  const validWebp = String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" && String.fromCharCode(...bytes.slice(8, 12)) === "WEBP";
+  if (!(validJpeg || validPng || validWebp)) return json({ ok: false, error: "הקובץ אינו תמונה תקינה." }, 415);
+  const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+  const key = "catalog/" + crypto.randomUUID() + "." + ext;
+  await env.UPLOADS.put(key, file.stream(), { httpMetadata: { contentType: file.type, cacheControl: "public, max-age=31536000, immutable" } });
+  const expires = String(Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 3650);
+  const signature = await signMedia(key, expires, env.UPLOAD_SIGNING_SECRET);
+  return json({ ok: true, url: url.origin + "/media/" + encodeURIComponent(key) + "?expires=" + expires + "&signature=" + signature });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     try {
+      if (url.pathname === "/admin") return Response.redirect(new URL("/admin/", url), 302);
+      if (url.pathname === "/admin/" || url.pathname.startsWith("/api/admin/")) {
+        const auth = await verifyAdminRequest(request, env);
+        if (auth.error) return auth.error;
+        if (url.pathname === "/admin/") return env.ASSETS.fetch(new Request(new URL("/admin/", url.origin), request));
+        if (request.method === "GET" && url.pathname === "/api/admin/session") return json({ ok: true, email: auth.email });
+        if (url.pathname === "/api/admin/products" && request.method === "GET") return json(await adminListProducts(env));
+        if (url.pathname === "/api/admin/products" && request.method === "POST") return await adminSaveProduct(request, env);
+        if (url.pathname.startsWith("/api/admin/products/")) {
+          const id = decodeURIComponent(url.pathname.slice("/api/admin/products/".length));
+          if (request.method === "PUT") return await adminSaveProduct(request, env, id);
+          if (request.method === "DELETE") return json({ ok: false, error: "מחיקה קבועה אינה זמינה; אפשר להסתיר מוצר." }, 405);
+        }
+        if (url.pathname === "/api/admin/testimonials" && request.method === "GET") return json(await adminListTestimonials(env));
+        if (url.pathname === "/api/admin/testimonials" && request.method === "POST") return await adminSaveTestimonial(request, env);
+        if (url.pathname.startsWith("/api/admin/testimonials/")) {
+          const id = decodeURIComponent(url.pathname.slice("/api/admin/testimonials/".length));
+          if (request.method === "PUT") return await adminSaveTestimonial(request, env, id);
+          if (request.method === "DELETE") return json({ ok: false, error: "מחיקה קבועה אינה זמינה; אפשר להסתיר המלצה." }, 405);
+        }
+        if (url.pathname === "/api/admin/uploads" && request.method === "POST") return await adminUpload(request, env, url);
+        return json({ ok: false, error: "הנתיב לא נמצא." }, 404);
+      }
       if (request.method === "GET" && url.pathname === "/api/products") {
         return json(await getProducts(env), 200, { "cache-control": "public, max-age=60, stale-while-revalidate=300" });
       }
