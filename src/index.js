@@ -117,6 +117,11 @@ async function handleUpload(request, env, url) {
   if (!(file instanceof File)) return json({ error: "לא נבחר קובץ תמונה." }, 400);
   const allowed = new Set(["image/jpeg", "image/png", "image/webp"]);
   if (!allowed.has(file.type)) return json({ error: "אפשר להעלות JPG, PNG או WEBP בלבד." }, 415);
+  const signature = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+  const isJpeg = signature[0] === 0xff && signature[1] === 0xd8 && signature[2] === 0xff;
+  const isPng = signature.length >= 8 && signature[0] === 0x89 && signature[1] === 0x50 && signature[2] === 0x4e && signature[3] === 0x47;
+  const isWebp = signature.length >= 12 && String.fromCharCode(...signature.slice(0,4)) === "RIFF" && String.fromCharCode(...signature.slice(8,12)) === "WEBP";
+  if (!(isJpeg || isPng || isWebp)) return json({ error: "תוכן הקובץ אינו תואם לתמונה תקינה." }, 415);
   if (file.size > 32 * 1024 * 1024) return json({ error: "גודל התמונה חורג מ־32MB." }, 413);
   if (!env.UPLOAD_SIGNING_SECRET) return json({ error: "העלאת התמונות לא הוגדרה במלואה." }, 503);
 
@@ -126,7 +131,7 @@ async function handleUpload(request, env, url) {
     httpMetadata: { contentType: file.type, cacheControl: "private, max-age=3600" },
     customMetadata: { uploadedAt: new Date().toISOString() }
   });
-  const expires = String(Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30);
+  const expires = String(Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365);
   const signature = await signMedia(key, expires, env.UPLOAD_SIGNING_SECRET);
   return json({ ok: true, url: `${url.origin}/media/${encodeURIComponent(key)}?expires=${expires}&signature=${signature}` });
 }
