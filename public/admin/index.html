@@ -6,7 +6,8 @@
 <style>
 :root{--brown:#3d2b1f;--gold:#bc986a;--cream:#fcfaf7;--line:#eadfd2;--muted:#806b59}
 *{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--brown);font-family:Assistant,Arial,sans-serif}
-header{background:#fff;border-bottom:1px solid var(--line);padding:18px 5vw;display:flex;justify-content:space-between;align-items:center;gap:15px;position:sticky;top:0;z-index:5}\n.login-card{max-width:420px;margin:12vh auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:0 8px 24px #3d2b1f0b}.login-card h2{margin-bottom:8px}.login-card form{margin-top:18px}.login-error{color:#9b3325;min-height:22px;font-size:14px}
+header{background:#fff;border-bottom:1px solid var(--line);padding:18px 5vw;display:flex;justify-content:space-between;align-items:center;gap:15px;position:sticky;top:0;z-index:5}
+.login-card{max-width:420px;margin:12vh auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:0 8px 24px #3d2b1f0b}.login-card h2{margin-bottom:8px}.login-card form{margin-top:18px}.login-error{color:#9b3325;min-height:22px;font-size:14px}
 h1{font-size:24px;margin:0}h2{font-size:21px;margin:0 0 16px}.sub{color:var(--muted);font-size:14px}
 main{max-width:1120px;margin:28px auto;padding:0 18px}.tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
 button{border:0;border-radius:9px;padding:10px 16px;font:600 16px Assistant;cursor:pointer;background:#eee5da;color:var(--brown)}
@@ -22,7 +23,13 @@ label{display:grid;gap:5px;font-weight:600}input,textarea{width:100%;border:1px 
 .empty{padding:35px;text-align:center;color:var(--muted)}.hidden{display:none!important}
 @media(max-width:650px){header{padding:14px 16px}h1{font-size:20px}.item{grid-template-columns:60px 1fr}.item img{width:60px;height:60px}.actions{grid-column:1/-1}.grid{grid-template-columns:1fr}.panel,.editor{padding:14px}}
 </style></head><body>
-<header><div><h1>WanderWood · ניהול</h1><div class="sub" id="identity">טוען פרטי מנהל…</div></div><a href="/" style="color:var(--brown)">מעבר לאתר</a></header>
+<section id="login-screen" class="login-card">
+<h2>כניסה לניהול</h2><div class="sub">יש להזין סיסמת מנהל בת 8 תווים.</div>
+<form id="login-form"><label>סיסמת מנהל<input id="admin-password" type="password" minlength="8" maxlength="8" autocomplete="current-password" required></label>
+<div id="login-error" class="login-error" role="alert"></div><button class="primary" type="submit">כניסה</button></form>
+</section>
+<div id="admin-content" class="hidden">
+<header><div><h1>WanderWood · ניהול</h1><div class="sub" id="identity">ממשק ניהול</div></div><div class="actions"><button id="logout" class="hidden">יציאה</button><a href="/" style="color:var(--brown)">מעבר לאתר</a></div></header>
 <main>
 <div class="tabs"><button class="tab active" data-tab="products">מוצרים</button><button class="tab" data-tab="testimonials">המלצות</button></div>
 <section id="products-panel" class="panel"><div class="toolbar"><div><h2>מוצרים</h2><div class="sub">השינויים נשמרים מיד באתר הפיתוח.</div></div><button class="primary" id="add-product">+ מוצר חדש</button></div><div id="products-list" class="items"><div class="empty">טוען מוצרים…</div></div></section>
@@ -36,7 +43,7 @@ label{display:grid;gap:5px;font-weight:600}input,textarea{width:100%;border:1px 
 <div id="testimonial-fields" class="hidden"><div class="grid"><label>שם הלקוח/ה<input name="testimonial_name" required maxlength="180"></label><label>פרטי זיהוי / עסק<input name="contact" maxlength="180"></label></div>
 <label>תוכן ההמלצה<textarea name="content" required maxlength="5000"></textarea></label><label>קישורי תמונות (קישור אחד בכל שורה)<textarea name="testimonial_images" placeholder="https://..."></textarea></label><label>העלאת תמונה לשרת<input class="image-file" type="file" accept="image/jpeg,image/png,image/webp"></label><label class="check"><input name="testimonial_is_active" type="checkbox" checked> ההמלצה מוצגת באתר</label></div>
 <div class="form-actions"><button class="primary" type="submit">שמירת שינויים</button><button type="button" id="cancel-edit">ביטול</button></div></form></section>
-</main><div id="notice" role="status"></div>
+</main></div><div id="notice" role="status"></div>
 <script>
 const $=s=>document.querySelector(s);let products=[],testimonials=[],mode='products',editingId=null;
 function notice(m){const n=$('#notice');n.textContent=m;n.style.display='block';clearTimeout(notice.timer);notice.timer=setTimeout(()=>n.style.display='none',3500)}
