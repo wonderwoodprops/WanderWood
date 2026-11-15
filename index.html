@@ -1,6 +1,49 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
+    <!-- Redirect legacy product links to the matching product on the new site. -->
+    <script>
+      (function () {
+        var product = new URLSearchParams(window.location.search).get('product');
+        if (!product) return;
+
+        var destinationByLegacyId = {
+          'p-0': 'little-wanderer-bench',
+          'p-2': 'pixie-stool',
+          'p-3': 'krama-baby-chair',
+          'p-4': '',
+          'p-5': 'arv-stand',
+          'p-6': 'swing',
+          'p-7': 'premium-log-swing',
+          'p-8': 'forest-log-ladder'
+        };
+
+        var destinationByLegacySlug = {
+          'little-wanderer-bench-ספסל-צילום-מתקפל-לילדים-60-סמ': 'little-wanderer-bench',
+          'pixie-stool-שרפרף-צילום-קומפקטי-30-סמ': 'pixie-stool',
+          'krama-baby-chair-כיסא-תינוק-קטן-35-סמ': 'krama-baby-chair',
+          'krama-step-chair-כיסא-צילום-דו-מצבי': '',
+          'arv-stand-סטנדר-חלאקה-40-סמ': 'arv-stand',
+          'נדנדה': 'swing',
+          'נדנדת-גזעים-פרימיום': 'premium-log-swing',
+          'סולם-גזעים-בגימור-כפרי-וחבלי-פשתן-דגם-יער': 'forest-log-ladder'
+        };
+
+        var destinationSlug = destinationByLegacyId[product];
+        if (typeof destinationSlug === 'undefined') {
+          destinationSlug = destinationByLegacySlug[product];
+        }
+        if (typeof destinationSlug === 'undefined') return;
+
+        var newSite = 'https://wanderwood.wonderwoodprops.workers.dev/';
+        var destination = destinationSlug
+          ? newSite + '?product=' + encodeURIComponent(destinationSlug)
+          : newSite;
+
+        window.location.replace(destination);
+      })();
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="favicon.png">
