@@ -22,9 +22,6 @@
       "bucket_name": "wanderwood-staging-assets"
     }
   ],
-  "vars": {
-    "ORDERS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbyWFRCaxHTg_N9Lc9TAlH2pYi7SYQXRsNQFzoOAMGK9WMkCvj_xMY1DoqFxXsnoCuoX/exec"
-  },
   "observability": {
     "enabled": true,
     "logs": { "enabled": true, "head_sampling_rate": 1 },
