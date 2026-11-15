@@ -245,44 +245,64 @@ async function renderPage(request, env) {
 
 
 // --- Admin authentication and catalog management ---
-function base64UrlToBytes(value) {
+function toBase64Url(bytes) {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function fromBase64Url(value) {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
   const padded = normalized + "=".repeat((4 - normalized.length % 4) % 4);
   return Uint8Array.from(atob(padded), (char) => char.charCodeAt(0));
 }
 
+async function adminSessionSignature(payload, password) {
+  const key = await crypto.subtle.importKey(
+    "raw", new TextEncoder().encode(password),
+    { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(payload));
+  return toBase64Url(new Uint8Array(signature));
+}
+
+function readCookie(request, name) {
+  const cookies = request.headers.get("Cookie") || "";
+  const entry = cookies.split(";").map((part) => part.trim()).find((part) => part.startsWith(name + "="));
+  return entry ? entry.slice(name.length + 1) : "";
+}
+
 async function verifyAdminRequest(request, env) {
-  const team = String(env.CF_ACCESS_TEAM_DOMAIN || "").replace(/^https?:\/\//, "").replace(/\/$/, "");
-  const audience = String(env.CF_ACCESS_AUD || "");
-  if (!team || !audience || !env.ADMIN_EMAILS) return { error: json({ ok: false, error: "אימות מנהל עדיין לא הוגדר בשרת." }, 503) };
-  const token = request.headers.get("Cf-Access-Jwt-Assertion");
-  if (!token) return { error: json({ ok: false, error: "נדרשת התחברות מנהל דרך Cloudflare Access." }, 401) };
+  const password = String(env.ADMIN_PASSWORD || "");
+  if (password.length !== 8) return { error: json({ ok: false, error: "סיסמת המנהל לא הוגדרה כראוי בשרת." }, 503) };
+  const token = readCookie(request, "ww_admin_session");
+  if (!token) return { error: json({ ok: false, error: "נדרשת התחברות." }, 401) };
   try {
     const parts = token.split(".");
-    if (parts.length !== 3) throw new Error("invalid token");
-    const header = JSON.parse(new TextDecoder().decode(base64UrlToBytes(parts[0])));
-    const claims = JSON.parse(new TextDecoder().decode(base64UrlToBytes(parts[1])));
-    const issuer = "https://" + team;
-    const now = Math.floor(Date.now() / 1000);
-    if (header.alg !== "RS256" || claims.iss !== issuer || !claims.exp || claims.exp < now || (claims.nbf && claims.nbf > now)) throw new Error("invalid claims");
-    const aud = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
-    if (!aud.includes(audience)) throw new Error("invalid audience");
-    const certResponse = await fetch(issuer + "/cdn-cgi/access/certs");
-    if (!certResponse.ok) throw new Error("certificates unavailable");
-    const certs = await certResponse.json();
-    const jwk = (certs.keys || []).find((key) => key.kid === header.kid);
-    if (!jwk) throw new Error("signing key not found");
-    const publicKey = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
-    const valid = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", publicKey, base64UrlToBytes(parts[2]), new TextEncoder().encode(parts[0] + "." + parts[1]));
-    if (!valid) throw new Error("invalid signature");
-    const email = String(claims.email || "").toLowerCase();
-    const allowed = String(env.ADMIN_EMAILS).split(",").map((item) => item.trim().toLowerCase()).filter(Boolean);
-    if (!email || !allowed.includes(email)) return { error: json({ ok: false, error: "לחשבון הזה אין הרשאת מנהל." }, 403) };
-    return { email };
-  } catch (error) {
-    console.error("Admin authentication failed:", error instanceof Error ? error.message : String(error));
-    return { error: json({ ok: false, error: "האימות נכשל. יש להתחבר מחדש." }, 401) };
+    if (parts.length !== 3) throw new Error("invalid session");
+    const [expires, nonce, signature] = parts;
+    const expiry = Number(expires);
+    if (!Number.isSafeInteger(expiry) || expiry < Math.floor(Date.now() / 1000) || !/^[A-Za-z0-9_-]{20,}$/.test(nonce)) throw new Error("expired session");
+    const expected = await adminSessionSignature(expires + "." + nonce, password);
+    const a = new TextEncoder().encode(signature);
+    const b = new TextEncoder().encode(expected);
+    if (a.length !== b.length) throw new Error("invalid signature");
+    let mismatch = 0;
+    for (let i = 0; i < a.length; i++) mismatch |= a[i] ^ b[i];
+    if (mismatch !== 0) throw new Error("invalid signature");
+    return { email: "מנהל" };
+  } catch {
+    return { error: json({ ok: false, error: "ההתחברות פגה או אינה תקפה. יש להתחבר מחדש." }, 401, { "Set-Cookie": "ww_admin_session=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0" }) };
   }
+}
+
+async function createAdminSession(env) {
+  const expires = String(Math.floor(Date.now() / 1000) + 12 * 60 * 60);
+  const nonceBytes = crypto.getRandomValues(new Uint8Array(18));
+  const nonce = toBase64Url(nonceBytes);
+  const payload = expires + "." + nonce;
+  const signature = await adminSessionSignature(payload, env.ADMIN_PASSWORD);
+  return payload + "." + signature;
 }
 
 function adminSlug(name, id) {
@@ -381,11 +401,24 @@ export default {
     const url = new URL(request.url);
     try {
       if (url.pathname === "/admin") return Response.redirect(new URL("/admin/", url), 302);
-      if (url.pathname === "/admin/" || url.pathname.startsWith("/api/admin/")) {
+      if (url.pathname === "/admin/") return env.ASSETS.fetch(new Request(new URL("/admin/", url.origin), request));
+      if (url.pathname.startsWith("/api/admin/")) {
+        if (request.method !== "GET" && request.headers.get("Origin") !== url.origin) return json({ ok: false, error: "הבקשה נדחתה." }, 403);
+        if (url.pathname === "/api/admin/login" && request.method === "POST") {
+          const configured = String(env.ADMIN_PASSWORD || "");
+          if (configured.length !== 8) return json({ ok: false, error: "סיסמת המנהל לא הוגדרה כראוי בשרת." }, 503);
+          const data = await request.json().catch(() => ({}));
+          const supplied = String(data.password || "");
+          if (supplied.length !== 8 || supplied !== configured) return json({ ok: false, error: "הסיסמה שגויה." }, 401);
+          const session = await createAdminSession(env);
+          return json({ ok: true }, 200, { "Set-Cookie": "ww_admin_session=" + session + "; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=43200" });
+        }
+        if (url.pathname === "/api/admin/logout" && request.method === "POST") {
+          return json({ ok: true }, 200, { "Set-Cookie": "ww_admin_session=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0" });
+        }
         const auth = await verifyAdminRequest(request, env);
         if (auth.error) return auth.error;
         if (request.method !== "GET" && request.headers.get("Origin") !== url.origin) return json({ ok: false, error: "הבקשה נדחתה." }, 403);
-        if (url.pathname === "/admin/") return env.ASSETS.fetch(new Request(new URL("/admin/", url.origin), request));
         if (request.method === "GET" && url.pathname === "/api/admin/session") return json({ ok: true, email: auth.email });
         if (url.pathname === "/api/admin/products" && request.method === "GET") return json(await adminListProducts(env));
         if (url.pathname === "/api/admin/products" && request.method === "POST") return await adminSaveProduct(request, env);
