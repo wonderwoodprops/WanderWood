@@ -24,7 +24,7 @@ Create a new Worker from this Git repository in Cloudflare:
 1. Open Workers & Pages > Create application > GitHub.
 2. Select `wonderwoodprops/WanderWood`.
 3. Select branch `cloudflare-d1-migration`.
-4. Set the Worker name to exactly `wanderwood-staging` (it must match `name` in `wrangler.jsonc`).
+4. The Cloudflare dashboard created the staging Worker as `wanderwood`; keep that exact name so Wrangler deploys into the same staging Worker.
 5. Leave the build command empty and use `npx wrangler deploy` as the deploy command.
 
 This must create a separate staging Worker. Do not connect the `main` branch or the production domain.
