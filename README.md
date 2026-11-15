@@ -1,38 +1,32 @@
-# WanderWood
-אתר למכירת אביזרי צילום מעץ בהתאמה אישית.
+# WanderWood — סביבת פיתוח Cloudflare
 
-## סנכרון מוצרים מגיליון Google Sheets
+ענף זה מיועד לגרסת הפיתוח והבדיקות של האתר. הוא נפרד מענף `main`, ואין לבצע ממנו פריסה לאתר החי לפני אישור מפורש.
 
-נוסף Workflow בשם `Sync products from Google Sheets` שמופעל ב־2 דרכים:
+## מבנה המערכת
 
-1. ידנית מתוך לשונית Actions (`workflow_dispatch`).
-2. דרך Webhook פנימי של GitHub (`repository_dispatch` עם type: `products_sync`).
+- `public/index.html` — ממשק האתר והעיצוב.
+- `src/index.js` — Cloudflare Worker, טעינת מוצרים מ־D1 ורינדור בצד השרת.
+- `migrations/` — מבנה מסד הנתונים ונתוני הפתיחה.
+- `wrangler.jsonc` — הגדרות סביבת הפיתוח, מסד הנתונים ואחסון התמונות.
+- `public/robots.txt`, `public/sitemap.xml` — קובצי סריקה וקידום.
+- `public/googlee171c1c38a6f9bef.html` — אימות Google.
 
-ה־Workflow טוען TSV מהשיטס, מייצר `products.json` חדש במאגר, ומבצע commit + push רק אם יש שינוי.
+## שירותים חיצוניים
 
-## קישורים להגדרה ולהפעלה מדף הניהול
+- נתוני מוצרים והמלצות נשמרים ב־Cloudflare D1.
+- תמונות מצורפות להזמנות נשמרות ב־Cloudflare R2.
+- שליחת ההזמנות והודעות הדוא"ל נשארת בשלב זה דרך Google Apps Script הקיים.
 
-החליפי את `<OWNER>` ו-`<REPO>`:
+## בדיקות מקומיות
 
-- דף Actions: `https://github.com/<OWNER>/<REPO>/actions`
-- ה-Workflow הספציפי: `https://github.com/<OWNER>/<REPO>/actions/workflows/sync-products.yml`
-- יצירת Personal Access Token (Classic): `https://github.com/settings/tokens/new`
-- ניהול Webhooks במערכת הניהול שלך (URL שצריך להגדיר):
-  - Endpoint: `https://api.github.com/repos/<OWNER>/<REPO>/dispatches`
-  - Method: `POST`
-  - Headers:
-    - `Accept: application/vnd.github+json`
-    - `Authorization: Bearer <GITHUB_TOKEN>`
-    - `X-GitHub-Api-Version: 2022-11-28`
-  - Body:
-
-```json
-{
-  "event_type": "products_sync",
-  "client_payload": {
-    "source": "admin-products"
-  }
-}
+```sh
+node --check src/index.js
+npx wrangler dev
 ```
 
-מומלץ לקרוא ל־Webhook הזה אחרי כל הוספה / עריכה / מחיקה של מוצר בדף הניהול.
+## כללי עבודה
+
+- עובדים בענף `cloudflare-d1-migration` בלבד.
+- אין לשנות את `main`, את הדומיין החי או את הגדרות הפריסה שלו.
+- אין להעביר את האתר לסביבת ייצור לפני בדיקת האתר, טופס ההזמנה, העלאת התמונות ושליחת הדוא"ל ואישור מפורש.
+- סודות נשמרים ב־Cloudflare כ־Secrets ואסור להכניס אותם לקוד או למאגר.

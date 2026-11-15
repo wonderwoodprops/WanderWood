@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="icon" type="image/png" href="https://wonderwoodprops.github.io/WanderWood/favicon.png">
     <meta name="description" content="WanderWood מתמחה באביזרי עץ לצילום בהתאמה אישית: אביזרי צילום לילדים, פתרונות לצלמות חוץ, סטים לצילומי ניו בורן ואביזרי פרימיום לצילום מקצועי.">
     <meta name="keywords" content="אביזרי עץ לצילום בהתאמה אישית, וונדרווד, WanderWood, צלמות חוץ, אביזרים לצילום ילדים, אביזרים לצילומי ניו בורן, אביזרי צילום מעץ, עיצוב תפאורה לצילום">
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
@@ -16,6 +16,7 @@
     <meta property="og:image" content="https://wonderwoodprops.github.io/WanderWood/favicon.png">
     <meta property="og:url" content="https://wonderwoodprops.github.io/WanderWood/">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://wonderwoodprops.github.io/WanderWood/favicon.png">
     <meta name="twitter:title" content="WanderWood | אביזרי עץ לצילום בהתאמה אישית">
     <meta name="twitter:description" content="אביזרי עץ לצילום ילדים וצילומי חוץ, בהתאמה אישית ובעבודת יד.">
     <link rel="canonical" href="https://wonderwoodprops.github.io/WanderWood/">
@@ -259,7 +260,7 @@
 
 <nav id="top-nav" class="top-nav flex justify-between items-center px-6 md:px-12 py-5 text-white">
     <a href="#home" class="smooth-link flex items-center gap-3 text-3xl font-bold tracking-tighter">
-        <img src="favicon.png" alt="Logo" class="w-10 h-10 object-contain">
+        <img src="https://wonderwoodprops.github.io/WanderWood/favicon.png" alt="Logo" class="w-10 h-10 object-contain">
         <div>Wander<span class="text-[#bc986a]">Wood</span></div>
     </a>
 
@@ -385,10 +386,9 @@
             <p class="mt-4 text-sm md:text-base text-gray-500 max-w-3xl mx-auto">המחירים באתר הם אינדיקציה כללית בלבד. המחיר הסופי גמיש ומושפע מפרמטרים טכניים משתנים וממורכבות העבודה.</p>
         </div>
         <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 min-h-[400px]">
-            <div class="col-span-full text-center">
-                <span class="loader"></span>
-                <p class="mt-4 text-gray-500">טוען מוצרים...</p>
-            </div>
+            <!-- SSR_PRODUCTS -->
+            <div class="col-span-full text-center"><span class="loader"></span><p class="mt-4 text-gray-500">טוען מוצרים...</p></div>
+            <!-- /SSR_PRODUCTS -->
         </div>
     </div>
 </section>
@@ -399,7 +399,7 @@
             <h2 class="text-4xl font-bold text-[#3d2b1f]">צלמות ממליצות</h2>
             <p class="mt-3 text-[#8a653f]">החוויה של הלקוחות שלנו מהעבודה עם WanderWood.</p>
         </div>
-        <div id="testimonials-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-8"></div>
+        <div id="testimonials-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-8"><!-- SSR_TESTIMONIALS --><!-- /SSR_TESTIMONIALS --></div>
     </div>
 </section>
 
@@ -628,12 +628,10 @@
         });
     });
 
-    const PRODUCTS_JSON_URL = './products.json';
-    const TESTIMONIALS_TSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTtyoe510f5vB5u1jW6b_VdZaCl2N_5IMO3i07jQB6P7YOtadif2C2otzqmWS5o34E-pIXDHVfX0fdf/pub?gid=1394850774&single=true&output=tsv';
+    const PRODUCTS_JSON_URL = '/api/products';
 
     const productCatalog = [];
     const orderState = new Map();
-    const IMGBB_API_KEY = '5d561102b019920681529a9226113eaf';
     let modalProductIndex = -1;
     let modalImageIndex = 0;
     let pendingFocusOrderKey = null;
@@ -645,7 +643,7 @@
     let hasCollectionBeenSeen = false;
     const contactPhone = '0556783085';
     const trackedEvents = new Set();
-    const SITE_BASE_URL = 'https://wonderwoodprops.github.io/WanderWood/';
+    const SITE_BASE_URL = window.location.origin + '/';
     const defaultSeo = {
         title: 'WanderWood | אביזרי עץ לצילום בהתאמה אישית',
         description: 'WanderWood מתמחה באביזרי עץ לצילום בהתאמה אישית: אביזרי צילום לילדים, פתרונות לצלמות חוץ, סטים לצילומי ניו בורן ואביזרי פרימיום לצילום מקצועי.',
@@ -783,7 +781,7 @@
 
             grid.innerHTML = productCatalog.map((product, index) => {
                 const imagesHtml = product.images
-                    .map((url, i) => `<img src="${url}" class="gallery-img ${i === 0 ? 'active' : ''}" data-index="${i}" alt="${product.name}">`)
+                    .map((url, i) => `<img src="${escapeHtml(url)}" class="gallery-img ${i === 0 ? 'active' : ''}" data-index="${i}" alt="${escapeHtml(product.name)}">`)
                     .join('');
                 const dotsHtml = product.images.length > 1
                     ? product.images.map((_, i) => `<div class="dot ${i === 0 ? 'active' : ''}"></div>`).join('')
@@ -795,7 +793,7 @@
                             ${imagesHtml}
                             <div class="dots-container">${dotsHtml}</div>
                         </div>
-                        <h4 class="text-xl font-bold mb-1">${product.name}</h4>
+                        <h4 class="text-xl font-bold mb-1">${escapeHtml(product.name)}</h4>
                                                 <div class="flex justify-between items-center gap-3">
                             <span class="text-xl font-bold text-[#3d2b1f]">₪${product.price}</span>
                             <div class="flex gap-2">
@@ -1005,7 +1003,7 @@
             chip.setAttribute('tabindex', '-1');
             chip.innerHTML = `
                 <div>
-                    <div class="font-medium">${item.name}</div>
+                    <div class="font-medium">${escapeHtml(item.name)}</div>
                     <div class="order-chip-actions mt-1">
                         <button type="button" class="qty-btn order-dec" data-order-key="${item.id}" aria-label="הפחת כמות">-</button>
                         <span class="min-w-[22px] text-center font-bold">${item.qty}</span>
@@ -1314,16 +1312,13 @@
                     }
                     const payload = new FormData();
                     payload.append('image', image.file);
-                    const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-                        method: 'POST',
-                        body: payload
-                    });
-                    const result = await response.json();
-                    if (!response.ok || !result?.data?.url) {
-                        throw new Error('IMGBB upload failed');
+                    const response = await fetch('/api/uploads', { method: 'POST', body: payload });
+                    const result = await response.json().catch(() => ({}));
+                    if (!response.ok || !result?.url) {
+                        throw new Error(result?.error || 'Image upload failed');
                     }
-                    image.uploadedUrl = result.data.url;
-                    uploadedUrls.push(result.data.url);
+                    image.uploadedUrl = result.url;
+                    uploadedUrls.push(result.url);
                 }
             }
             return uploadedUrls;
@@ -1432,17 +1427,15 @@
                     image_urls: imageUrls
                 };
 
-                const endpoint = 'https://script.google.com/macros/s/AKfycbyWFRCaxHTg_N9Lc9TAlH2pYi7SYQXRsNQFzoOAMGK9WMkCvj_xMY1DoqFxXsnoCuoX/exec';
-                const requestBody = new URLSearchParams();
-                requestBody.append('formData', JSON.stringify(payload));
-                const requestConfig = {
+                const response = await fetch('/api/orders', {
                     method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: requestBody
-                };
-
-                await fetch(endpoint, requestConfig);
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok || !result?.ok) {
+                    throw new Error(result?.error || 'Order submission failed');
+                }
 
                 showSuccessModal();
                 const leadPayload = buildLeadEventPayload();
@@ -1594,25 +1587,11 @@
         if (!testimonialsGrid) return;
 
         try {
-            const response = await fetch(TESTIMONIALS_TSV_URL);
-            const rawData = await response.text();
-            const rows = rawData.split('\n').slice(1).filter(Boolean);
+            const response = await fetch('/api/testimonials', { cache: 'no-store' });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const testimonials = await response.json();
 
-            const testimonials = rows
-                .map((row) => row.split('\t'))
-                .filter((columns) => columns.length >= 3)
-                .map(([nameRaw, contactRaw, contentRaw, imagesRaw]) => ({
-                    name: (nameRaw || '').trim(),
-                    contact: (contactRaw || '').trim(),
-                    content: (contentRaw || '').trim(),
-                    images: (imagesRaw || '')
-                        .split(',')
-                        .map((url) => url.trim())
-                        .filter(Boolean)
-                }))
-                .filter((item) => item.content);
-
-            if (!testimonials.length) {
+            if (!Array.isArray(testimonials) || !testimonials.length) {
                 testimonialsGrid.innerHTML = '<p class="col-span-full text-center text-gray-500">עדיין אין המלצות להצגה.</p>';
                 return;
             }
@@ -1623,7 +1602,7 @@
                         <p class="font-bold text-[#3d2b1f]">${escapeHtml(item.name || 'לקוחה')}</p>
                         <p class="text-sm text-[#8a653f] text-right">${escapeHtml(item.contact || '')}</p>
                     </div>
-                    ${item.images.length ? `
+                    ${Array.isArray(item.images) && item.images.length ? `
                         <div class="flex justify-start gap-2 flex-wrap mb-4">
                             ${item.images.map((img, idx) => `
                                 <img src="${escapeHtml(img)}" alt="תמונת המלצה ${idx + 1}" class="testimonial-thumb w-[84px] h-[84px] sm:w-[96px] sm:h-[96px] object-cover rounded-2xl border border-[#ecdcc8] shadow-sm cursor-zoom-in">
