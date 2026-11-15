@@ -25,3 +25,4 @@ jobs:
           test -s migrations/0002_seed_initial_catalog.sql
           test -s wrangler.jsonc
           test -s public/index.html
+          test -s public/admin/index.html
