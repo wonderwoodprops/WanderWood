@@ -209,6 +209,13 @@ async function renderPage(request, env) {
 
   if (product) {
     const image = product.images[0] || "";
+    html = html.replace(/(<meta property="og:image" content=")[^"]*(")/, (_match, before, after) => `${before}${escapeHtml(image)}${after}`);
+    const twitterImageTag = '<meta name="twitter:image" content="">';
+    if (html.includes(twitterImageTag)) {
+      html = html.replace(twitterImageTag, `<meta name="twitter:image" content="${escapeHtml(image)}">`);
+    } else {
+      html = html.replace("</head>", `<meta name="twitter:image" content="${escapeHtml(image)}"></head>`);
+    }
     html = html.replace('<h3 id="modal-title" class="modal-product-title"></h3>', `<h3 id="modal-title" class="modal-product-title">${escapeHtml(product.name)}</h3>`);
     html = html.replace('<span id="modal-price" class="modal-price-pill text-xl"></span>', `<span id="modal-price" class="modal-price-pill text-xl">₪${product.price}</span>`);
     html = html.replace('<p id="modal-description" class="modal-description text-gray-600 mb-2"></p>', `<p id="modal-description" class="modal-description text-gray-600 mb-2">${escapeHtml(product.description)}</p>`);
