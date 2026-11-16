@@ -396,6 +396,47 @@ async function adminUpload(request, env, url) {
   return json({ ok: true, url: url.origin + "/media/" + encodeURIComponent(key) + "?expires=" + expires + "&signature=" + signature });
 }
 
+async function adminListImages(env, url) {
+  if (!env.UPLOADS || !env.UPLOAD_SIGNING_SECRET) return json({ ok: false, error: "אחסון התמונות לא הוגדר." }, 503);
+  const images = [];
+  let cursor;
+  do {
+    const page = await env.UPLOADS.list({ prefix: "catalog/", cursor, limit: 1000 });
+    for (const object of page.objects || []) {
+      const expires = String(Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 3650);
+      const signature = await signMedia(object.key, expires, env.UPLOAD_SIGNING_SECRET);
+      images.push({ key: object.key, size: object.size, uploaded: object.uploaded?.toISOString?.() || null, url: url.origin + "/media/" + object.key.split("/").map(encodeURIComponent).join("/") + "?expires=" + expires + "&signature=" + signature });
+    }
+    cursor = page.truncated ? page.cursor : undefined;
+  } while (cursor);
+  images.sort((a,b)=>(b.uploaded||"").localeCompare(a.uploaded||""));
+  return json(images);
+}
+function mediaKeyFromUrl(value) {
+  try {
+    const u = new URL(value);
+    if (!u.pathname.startsWith("/media/catalog/")) return null;
+    return u.pathname.slice("/media/".length).split("/").map(decodeURIComponent).join("/");
+  } catch { return null; }
+}
+async function adminDeleteImage(env, key) {
+  if (!env.UPLOADS || !key || !key.startsWith("catalog/") || key.includes("..")) return json({ok:false,error:"תמונה לא תקינה."},400);
+  const object = await env.UPLOADS.head(key);
+  if (!object) return json({ok:false,error:"התמונה לא נמצאה באחסון."},404);
+  const [products, testimonials] = await Promise.all([
+    env.DB.prepare("SELECT id, images_json FROM products").all(),
+    env.DB.prepare("SELECT id, images_json FROM testimonials").all()
+  ]);
+  const clean = rows => (rows.results||[]).map(row => ({id:row.id,images:safeImages(row.images_json).filter(url=>mediaKeyFromUrl(url)!==key)}));
+  const p = clean(products), t = clean(testimonials);
+  await env.DB.batch([
+    ...p.filter(x=>x.images.length!==safeImages((products.results||[]).find(r=>r.id===x.id)?.images_json).length).map(x=>env.DB.prepare("UPDATE products SET images_json=?, updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(JSON.stringify(x.images),x.id)),
+    ...t.filter(x=>x.images.length!==safeImages((testimonials.results||[]).find(r=>r.id===x.id)?.images_json).length).map(x=>env.DB.prepare("UPDATE testimonials SET images_json=?, updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(JSON.stringify(x.images),x.id))
+  ]);
+  await env.UPLOADS.delete(key);
+  return json({ok:true});
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -435,6 +476,11 @@ export default {
           if (request.method === "DELETE") return json({ ok: false, error: "מחיקה קבועה אינה זמינה; אפשר להסתיר המלצה." }, 405);
         }
         if (url.pathname === "/api/admin/uploads" && request.method === "POST") return await adminUpload(request, env, url);
+        if (url.pathname === "/api/admin/images" && request.method === "GET") return await adminListImages(env, url);
+        if (url.pathname.startsWith("/api/admin/images/") && request.method === "DELETE") {
+          const key = decodeURIComponent(url.pathname.slice("/api/admin/images/".length));
+          return await adminDeleteImage(env, key);
+        }
         return json({ ok: false, error: "הנתיב לא נמצא." }, 404);
       }
       if (request.method === "GET" && url.pathname === "/api/products") {
