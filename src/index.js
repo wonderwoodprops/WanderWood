@@ -434,8 +434,11 @@ async function adminListImages(env, url) {
 function mediaKeyFromUrl(value) {
   try {
     const u = new URL(value);
-    if (!u.pathname.startsWith("/media/catalog/")) return null;
-    return u.pathname.slice("/media/".length).split("/").map(decodeURIComponent).join("/");
+    // Legacy signed media URLs may encode the whole key as one path segment:
+    // /media/catalog%2F<uuid>.jpg. Decode before checking the prefix.
+    const pathname = decodeURIComponent(u.pathname);
+    if (!pathname.startsWith("/media/catalog/")) return null;
+    return pathname.slice("/media/".length);
   } catch { return null; }
 }
 async function adminDeleteImage(env, key) {
