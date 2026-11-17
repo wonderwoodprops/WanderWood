@@ -72,6 +72,7 @@
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .gallery-container { position: relative; width: 100%; height: 18rem; overflow: hidden; border-radius: 0.75rem; }
+        .availability-ribbon { position: absolute; top: 12px; right: 12px; z-index: 20; max-width: calc(100% - 24px); padding: 7px 13px; border: 1px solid rgba(188, 152, 106, 0.75); border-radius: 999px; background: rgba(61, 43, 31, 0.94); color: #f7ead8; font-size: 0.78rem; line-height: 1.25; font-weight: 700; box-shadow: 0 3px 10px rgba(35, 24, 16, 0.22); pointer-events: none; }
         .gallery-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 0.8s ease-in-out; opacity: 0; }
         .gallery-img.active { opacity: 1; }
         .dots-container { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 10; }
@@ -769,7 +770,8 @@
                     description: (item?.description || '').toString().trim().replace(/\s\s+/g, '\n'),
                     price: Number(item?.price) || 0,
                     images: Array.isArray(item?.images) && item.images.length ? item.images : ['https://placehold.co/600x400?text=WanderWood'],
-                    isAvailableNow: item?.is_available_now === true || item?.is_available_now === 1
+                    isAvailableNow: item?.is_available_now === true || item?.is_available_now === 1,
+                    availabilityLabel: (item?.availability_label || 'זמין במלאי').toString().trim() || 'זמין במלאי'
                 };
                 product.slug = slugifyProductName(item?.slug || product.name) || product.id;
 
@@ -793,13 +795,13 @@
                     <div class="wood-card p-4 cursor-pointer" data-aos="zoom-in" data-product-index="${index}">
                         <div class="gallery-container mb-5 open-product-modal cursor-pointer" data-product-index="${index}">
                             ${imagesHtml}
+                            ${product.isAvailableNow ? `<span class="availability-ribbon">${escapeHtml(product.availabilityLabel)}</span>` : ''}
                             <div class="dots-container">${dotsHtml}</div>
                         </div>
                         <h4 class="text-xl font-bold mb-1">${escapeHtml(product.name)}</h4>
                                                 <div class="flex justify-between items-center gap-3">
                             <div class="flex flex-col items-start gap-1">
                                 <span class="text-xl font-bold text-[#3d2b1f]">₪${product.price}</span>
-                                ${product.isAvailableNow ? '<span class="rounded-full border border-green-200 bg-green-50 px-2 py-1 text-xs font-bold text-green-800">זמין במלאי</span>' : ''}
                             </div>
                             <div class="flex gap-2">
                                 <button class="open-product-modal bg-white border border-gray-300 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 transition" data-product-index="${index}">פרטים</button>
@@ -869,6 +871,7 @@
         document.getElementById('modal-description').textContent = product.description;
         document.getElementById('modal-price').textContent = `₪${product.price}`;
         document.getElementById('modal-availability').classList.toggle('hidden', !product.isAvailableNow);
+        document.getElementById('modal-availability').textContent = product.availabilityLabel || 'זמין במלאי';
         updateModalAddButton();
         updateModalImage();
         syncProductUrl(product);
