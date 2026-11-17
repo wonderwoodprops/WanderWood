@@ -1723,8 +1723,9 @@
         const urlParams = new URLSearchParams(window.location.search);
         const productId = urlParams.get('product');
 
-        // אם אין מזהה מוצר ב-URL, אל תפעיל סכמת מוצר בכלל (זה דף הבית)
-        if (!productId) return;
+        // דף מוצר ישיר כבר מקבל סכמת מוצר מהשרת; אין להוסיף סכימה כפולה.
+        if (!productId || document.getElementById('server-product-schema')) return;
+        const selectedProduct = productCatalog.find((item) => item.id === productId || item.slug === productId);
 
         const nameElem = document.getElementById('modal-title');
         const priceElem = document.getElementById('modal-price');
@@ -1749,7 +1750,7 @@
                     "priceCurrency": "ILS",
                     "price": price,
                     "itemCondition": "https://schema.org/NewCondition",
-                    "availability": "https://schema.org/InStock"
+                    ...(selectedProduct?.isAvailableNow ? { "availability": "https://schema.org/InStock" } : {})
                 }
             };
 
