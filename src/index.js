@@ -30,7 +30,7 @@ function safeImages(raw) {
 
 async function getProducts(env) {
   const { results = [] } = await env.DB.prepare(
-    "SELECT id, slug, name, price, description, images_json, is_available_now FROM products WHERE is_active = 1 ORDER BY sort_order ASC, name ASC"
+    "SELECT id, slug, name, price, description, images_json, is_available_now, availability_label FROM products WHERE is_active = 1 ORDER BY sort_order ASC, name ASC"
   ).all();
   return results.map((row) => ({
     id: row.id,
