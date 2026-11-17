@@ -30,7 +30,7 @@ function safeImages(raw) {
 
 async function getProducts(env) {
   const { results = [] } = await env.DB.prepare(
-    "SELECT id, slug, name, price, description, images_json FROM products WHERE is_active = 1 ORDER BY sort_order ASC, name ASC"
+    "SELECT id, slug, name, price, description, images_json, is_available_now FROM products WHERE is_active = 1 ORDER BY sort_order ASC, name ASC"
   ).all();
   return results.map((row) => ({
     id: row.id,
@@ -38,7 +38,8 @@ async function getProducts(env) {
     name: row.name,
     price: Number(row.price) || 0,
     description: row.description || "",
-    images: safeImages(row.images_json)
+    images: safeImages(row.images_json),
+    is_available_now: Boolean(row.is_available_now)
   }));
 }
 
@@ -70,7 +71,10 @@ function renderProductCard(product, index) {
       </div>
       <h4 class="text-xl font-bold mb-1">${escapeHtml(product.name)}</h4>
       <div class="flex justify-between items-center gap-3">
-        <span class="text-xl font-bold text-[#3d2b1f]">₪${product.price}</span>
+        <div class="flex flex-col items-start gap-1">
+          <span class="text-xl font-bold text-[#3d2b1f]">₪${product.price}</span>
+          ${product.is_available_now ? '<span class="rounded-full border border-green-200 bg-green-50 px-2 py-1 text-xs font-bold text-green-800">זמין במלאי</span>' : ''}
+        </div>
         <div class="flex gap-2">
           <button class="open-product-modal bg-white border border-gray-300 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 transition" data-product-index="${index}">פרטים</button>
           <button class="add-to-order bg-black text-white px-4 py-2 rounded-lg text-sm hover:bg-[#bc986a] transition" data-product-index="${index}">הוסף</button>
@@ -228,7 +232,7 @@ async function renderPage(request, env) {
         priceCurrency: "ILS",
         price: product.price,
         itemCondition: "https://schema.org/NewCondition",
-        availability: "https://schema.org/InStock"
+        ...(product.is_available_now ? { availability: "https://schema.org/InStock" } : {})
       }
     };
     html = html.replace("</head>", `<script id="server-product-schema" type="application/ld+json">${JSON.stringify(schema).replace(/</g, "\\u003c")}</script></head>`);
@@ -320,8 +324,8 @@ function parseImageList(value) {
 }
 
 async function adminListProducts(env) {
-  const { results = [] } = await env.DB.prepare("SELECT id, slug, name, price, description, images_json, sort_order, is_active FROM products ORDER BY sort_order ASC, name ASC").all();
-  return results.map((row) => ({ ...row, price: Number(row.price) || 0, images: safeImages(row.images_json), is_active: Boolean(row.is_active) }));
+  const { results = [] } = await env.DB.prepare("SELECT id, slug, name, price, description, images_json, sort_order, is_active, is_available_now FROM products ORDER BY sort_order ASC, name ASC").all();
+  return results.map((row) => ({ ...row, price: Number(row.price) || 0, images: safeImages(row.images_json), is_active: Boolean(row.is_active), is_available_now: Boolean(row.is_available_now) }));
 }
 
 async function adminSaveProduct(request, env, id = null) {
@@ -332,17 +336,18 @@ async function adminSaveProduct(request, env, id = null) {
   const images = parseImageList(data.images);
   const description = String(data.description || "").trim().slice(0, 5000);
   const active = data.is_active === false || data.is_active === 0 ? 0 : 1;
+  const availableNow = data.is_available_now === true || data.is_available_now === 1 ? 1 : 0;
   if (id) {
     const existing = await env.DB.prepare("SELECT id, name, slug FROM products WHERE id = ?").bind(id).first();
     if (!existing) return json({ ok: false, error: "המוצר לא נמצא." }, 404);
     const slug = existing.name === name ? existing.slug : adminSlug(name, id);
-    await env.DB.prepare("UPDATE products SET name=?, slug=?, price=?, description=?, images_json=?, is_active=?, updated_at=CURRENT_TIMESTAMP WHERE id=?")
-      .bind(name, slug, Math.round(price), description, JSON.stringify(images), active, id).run();
+    await env.DB.prepare("UPDATE products SET name=?, slug=?, price=?, description=?, images_json=?, is_active=?, is_available_now=?, updated_at=CURRENT_TIMESTAMP WHERE id=?")
+      .bind(name, slug, Math.round(price), description, JSON.stringify(images), active, availableNow, id).run();
   } else {
     const newId = crypto.randomUUID();
     const orderRow = await env.DB.prepare("SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM products").first();
-    await env.DB.prepare("INSERT INTO products (id, slug, name, price, description, images_json, sort_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
-      .bind(newId, adminSlug(name, newId), name, Math.round(price), description, JSON.stringify(images), Number(orderRow?.next_order || 1), active).run();
+    await env.DB.prepare("INSERT INTO products (id, slug, name, price, description, images_json, sort_order, is_active, is_available_now) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+      .bind(newId, adminSlug(name, newId), name, Math.round(price), description, JSON.stringify(images), Number(orderRow?.next_order || 1), active, availableNow).run();
     id = newId;
   }
   return json({ ok: true, id });
